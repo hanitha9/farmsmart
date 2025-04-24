@@ -170,6 +170,7 @@
         // Handle auth form submission
         document.getElementById('authForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            console.log('Auth form submitted');
             const isLogin = authTitle.textContent === 'Login';
             const endpoint = isLogin ? '/api/login' : '/api/register';
             const data = {
@@ -191,6 +192,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
+                console.log('Auth response status:', response.status);
                 const result = await response.json();
                 authLoading.classList.add('hidden');
 
@@ -202,6 +204,7 @@
 
                 if (isLogin) {
                     farmerId = result.farmer_id;
+                    console.log('Logged in, farmerId:', farmerId);
                     document.getElementById('authSection').classList.add('hidden');
                     document.getElementById('dashboard').classList.remove('hidden');
                     document.getElementById('logoutBtn').classList.remove('hidden');
@@ -213,6 +216,7 @@
                     authError.classList.add('text-green-500');
                 }
             } catch (err) {
+                console.error('Auth error:', err);
                 authLoading.classList.add('hidden');
                 authError.textContent = 'Network error occurred';
                 authError.classList.remove('hidden');
@@ -221,6 +225,7 @@
 
         // Toggle soil input method
         function toggleSoilInput() {
+            console.log('Toggling soil input');
             const soilOption = document.getElementById('soilOption').value;
             document.getElementById('manualSoil').classList.toggle('hidden', soilOption !== 'manual');
             document.getElementById('sensorSoil').classList.toggle('hidden', soilOption !== 'sensor');
@@ -235,10 +240,18 @@
         // Handle farm form submission
         document.getElementById('farmForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            console.log('Farm form submitted');
             const farmError = document.getElementById('farmError');
             const farmLoading = document.getElementById('farmLoading');
             farmError.classList.add('hidden');
             farmLoading.classList.remove('hidden');
+
+            if (!farmerId) {
+                farmError.textContent = 'Please login to submit farm details';
+                farmError.classList.remove('hidden');
+                farmLoading.classList.add('hidden');
+                return;
+            }
 
             const data = {
                 farmer_id: farmerId,
@@ -296,13 +309,16 @@
                 }
             }
 
+            console.log('Sending data to /api/recommend:', data);
             try {
                 const response = await fetch('/api/recommend', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
+                console.log('Recommend response status:', response.status);
                 const result = await response.json();
+                console.log('Recommend response data:', result);
                 farmLoading.classList.add('hidden');
 
                 if (!response.ok) {
@@ -363,8 +379,9 @@
 
                 loadMonitoring();
             } catch (err) {
+                console.error('Recommend error:', err);
                 farmLoading.classList.add('hidden');
-                farmError.textContent = 'Network error occurred';
+                farmError.textContent = 'Failed to connect to server. Please try again.';
                 farmError.classList.remove('hidden');
             }
         });
@@ -372,6 +389,7 @@
         // Load monitoring data
         async function loadMonitoring() {
             if (!farmerId) return;
+            console.log('Loading monitoring data for farmerId:', farmerId);
             const monitoringError = document.getElementById('monitoringError');
             const monitoringLoading = document.getElementById('monitoringLoading');
             monitoringError.classList.add('hidden');
@@ -379,6 +397,7 @@
 
             try {
                 const response = await fetch(`/api/monitor?farmer_id=${farmerId}`);
+                console.log('Monitoring response status:', response.status);
                 const result = await response.json();
                 monitoringLoading.classList.add('hidden');
 
@@ -398,6 +417,7 @@
                 `;
                 document.getElementById('monitoringSection').classList.remove('hidden');
             } catch (err) {
+                console.error('Monitoring error:', err);
                 monitoringLoading.classList.add('hidden');
                 monitoringError.textContent = 'Network error occurred';
                 monitoringError.classList.remove('hidden');
@@ -409,6 +429,7 @@
 
         // Logout
         document.getElementById('logoutBtn').addEventListener('click', () => {
+            console.log('Logging out');
             farmerId = null;
             document.getElementById('dashboard').classList.add('hidden');
             document.getElementById('authSection').classList.remove('hidden');
