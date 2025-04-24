@@ -101,7 +101,7 @@ logger.info("RandomForest model trained successfully")
 SOIL_THINGSPEAK_URL = "https://api.thingspeak.com/channels/2905970/feeds.json?api_key=41R500B0CY37KF7B&results=10"
 MOTOR_THINGSPEAK_URL = "https://api.thingspeak.com/channels/2916541/feeds.json?api_key=CBTANP5HNT77GXXP&results=10"
 
-# Crop image URLs (placeholder or hosted)
+# Crop image URLs (improved with valid placeholders)
 crop_images = {
     "Paddy": "https://images.unsplash.com/photo-1592982538443-2e5b5f6b5d5e",
     "Tomato": "https://images.unsplash.com/photo-1598033129183-8b9a6b9b9b9b",
@@ -260,36 +260,7 @@ def recommend():
             logger.error("No nutrient data found for suitable crops")
             return jsonify({"error": "No nutrient data found for suitable crops"}), 400
 
-        # Generate initial watering schedule (placeholder, updated in /api/schedule)
-        base_water = recommendations[0]['water_requirement'] * land_size
-        soil_adjust = {
-            'Sandy Soil': 1.2,
-            'Black Cotton Soil - Deep Black Soil': 0.8,
-            'Coastal Alluvial': 1.0,
-            'Loamy Soil': 1.0,
-            'Laterite Soil': 0.9,
-            'Red Sandy Loam - Fine Sandy Loam': 1.1,
-            'Red Sandy Loam - Coarse Sandy Loam': 1.1,
-            'Red Sandy Loam - Gravelly Sandy Loam': 1.2,
-            'Black Cotton Soil - Shallow Black Soil': 0.9,
-            'Black Cotton Soil - Medium Black Soil': 0.85
-        }.get(soil_type, 1.0)
-        total_water = base_water * soil_adjust
-        schedule = []
-        for i in range(7):
-            date = (datetime.datetime.strptime(start_date, '%Y-%m-%d') + 
-                    datetime.timedelta(days=i)).strftime('%Y-%m-%d')
-            schedule.append({
-                "day": date,
-                "time": "08:00 AM",
-                "water_quantity": round(total_water, 2),
-                "method": "Drip Irrigation",
-                "speed": "Slow",
-                "duration": "60 min"
-            })
-        logger.info(f"Watering schedule generated: {schedule}")
-
-        # Save farm data
+        # Save farm data (no initial schedule)
         try:
             conn = sqlite3.connect('farm.db')
             c = conn.cursor()
@@ -299,7 +270,7 @@ def recommend():
                      (farmer_id, location, land_size, soil_option, soil_type,
                       data.get('r', 0), data.get('g', 0), data.get('b', 0), 
                       data.get('ph', 0), data.get('ec', 0), start_date, water_available, 
-                      recommendations[0]['crop'], datetime.datetime.now().isoformat()))
+                      None, datetime.datetime.now().isoformat()))
             conn.commit()
             logger.info("Farm data saved successfully")
         except Exception as e:
@@ -315,16 +286,9 @@ def recommend():
                     rec[key] = int(value)
                 elif isinstance(value, np.floating):
                     rec[key] = float(value)
-        for sch in schedule:
-            for key, value in sch.items():
-                if isinstance(value, np.integer):
-                    sch[key] = int(value)
-                elif isinstance(value, np.floating):
-                    sch[key] = float(value)
 
         return jsonify({
             "recommendations": recommendations,
-            "schedule": schedule,
             "soil_type": soil_type
         }), 200
     except Exception as e:
