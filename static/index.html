@@ -39,6 +39,20 @@
             align-items: center;
             gap: 1rem;
         }
+        .navbar-tabs a {
+            transition: color 0.3s;
+        }
+        .navbar-tabs a:hover {
+            text-decoration: none !important; /* Prevent underline on hover */
+        }
+        .navbar-tabs a.active {
+            color: #a7f3d0; /* Matches text-green-200 */
+            font-weight: bold; /* Optional: make active tab bold */
+        }
+        .navbar-tabs a:focus {
+            outline: 2px solid #a7f3d0; /* Focus outline for accessibility */
+            outline-offset: 2px;
+        }
         #crop-details {
             background-size: cover;
             background-position: center;
@@ -54,15 +68,15 @@
         <div class="container mx-auto flex justify-between items-center">
             <h1 class="text-2xl font-bold">FarmSmart</h1>
             <div class="navbar-tabs">
-                <a href="#" id="farm-input-tab" class="text-white hover:text-green-200 hidden">Farm Input</a>
-                <a href="#" id="recommendations-tab" class="text-white hover:text-green-200 hidden">Recommendations</a>
-                <a href="#" id="schedule-tab" class="text-white hover:text-green-200 hidden">Generate Schedule</a>
-                <a href="#" id="crop-details-tab" class="text-white hover:text-green-200 hidden">Crop Details</a>
-                <a href="#" id="moisture-tab" class="text-white hover:text-green-200 hidden">Moisture Level</a>
-                <a href="#" id="motor-status-tab" class="text-white hover:text-green-200 hidden">Motor Status</a>
-                <a href="#" id="notifications-tab" class="text-white hover:text-green-200 hidden">Notifications</a>
-                <a href="#" id="pesticides-tab" class="text-white hover:text-green-200 hidden">Organic Pesticides</a>
-                <a href="#" id="progress-tab" class="text-white hover:text-green-200 hidden">Crop Progress</a>
+                <a href="#" id="farm-input-tab" class="text-white hover:text-green-200 hidden" role="tab" aria-controls="farm-input" aria-selected="false" tabindex="0">Farm Input</a>
+                <a href="#" id="recommendations-tab" class="text-white hover:text-green-200 hidden" role="tab" aria-controls="recommendations" aria-selected="false" tabindex="0">Recommendations</a>
+                <a href="#" id="schedule-tab" class="text-white hover:text-green-200 hidden" role="tab" aria-controls="schedule" aria-selected="false" tabindex="0">Generate Schedule</a>
+                <a href="#" id="crop-details-tab" class="text-white hover:text-green-200 hidden" role="tab" aria-controls="crop-details" aria-selected="false" tabindex="0">Crop Details</a>
+                <a href="#" id="moisture-tab" class="text-white hover:text-green-200 hidden" role="tab" aria-controls="moisture" aria-selected="false" tabindex="0">Moisture Level</a>
+                <a href="#" id="motor-status-tab" class="text-white hover:text-green-200 hidden" role="tab" aria-controls="motor-status" aria-selected="false" tabindex="0">Motor Status</a>
+                <a href="#" id="notifications-tab" class="text-white hover:text-green-200 hidden" role="tab" aria-controls="notifications" aria-selected="false" tabindex="0">Notifications</a>
+                <a href="#" id="pesticides-tab" class="text-white hover:text-green-200 hidden" role="tab" aria-controls="pesticides" aria-selected="false" tabindex="0">Organic Pesticides</a>
+                <a href="#" id="progress-tab" class="text-white hover:text-green-200 hidden" role="tab" aria-controls="progress" aria-selected="false" tabindex="0">Crop Progress</a>
                 <button id="logoutBtn" class="hidden bg-red-500 hover:bg-red-600 px-4 py-2 rounded">Logout</button>
             </div>
         </div>
@@ -642,18 +656,74 @@
 
         // Tab switching
         function switchTab(tabId) {
-            document.querySelectorAll('#tab-content > div').forEach(div => div.classList.add('hidden'));
-            document.querySelectorAll('nav a').forEach(a => a.classList.remove('text-green-200', 'underline'));
-            document.getElementById(tabId).classList.remove('hidden');
-            document.getElementById(`${tabId}-tab`).classList.add('text-green-200', 'underline');
+            try {
+                // Hide all tab content
+                const tabContent = document.querySelectorAll('#tab-content > div');
+                if (!tabContent.length) {
+                    console.error('No tab content found');
+                    return;
+                }
+                tabContent.forEach(div => div.classList.add('hidden'));
+
+                // Remove active state from all tabs
+                const navLinks = document.querySelectorAll('nav a');
+                if (!navLinks.length) {
+                    console.error('No navigation links found');
+                    return;
+                }
+                navLinks.forEach(a => {
+                    a.classList.remove('active');
+                    a.setAttribute('aria-selected', 'false');
+                });
+
+                // Show the selected tab content
+                const targetTab = document.getElementById(tabId);
+                if (!targetTab) {
+                    console.error(`Tab content with id "${tabId}" not found`);
+                    return;
+                }
+                targetTab.classList.remove('hidden');
+
+                // Set the active tab
+                const targetTabLink = document.getElementById(`${tabId}-tab`);
+                if (!targetTabLink) {
+                    console.error(`Tab link with id "${tabId}-tab" not found`);
+                    return;
+                }
+                targetTabLink.classList.add('active');
+                targetTabLink.setAttribute('aria-selected', 'true');
+                targetTabLink.focus(); // Set focus for accessibility
+            } catch (err) {
+                console.error('Error in switchTab:', err);
+            }
         }
 
-        document.querySelectorAll('nav a').forEach(a => {
-            a.addEventListener('click', (e) => {
-                e.preventDefault();
-                switchTab(a.id.replace('-tab', ''));
+        // Attach event listeners for tab switching
+        function setupTabNavigation() {
+            const navLinks = document.querySelectorAll('nav a[role="tab"]');
+            if (!navLinks.length) {
+                console.error('No navigation links with role="tab" found');
+                return;
+            }
+
+            navLinks.forEach(a => {
+                a.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const tabId = a.id.replace('-tab', '');
+                    console.log(`Switching to tab: ${tabId}`); // Debug
+                    switchTab(tabId);
+                });
+
+                // Add keyboard support for accessibility
+                a.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        const tabId = a.id.replace('-tab', '');
+                        switchTab(tabId);
+                    }
+                });
             });
-        });
+        }
 
         // Logout
         document.getElementById('logoutBtn').addEventListener('click', () => {
@@ -717,6 +787,9 @@
             const farmForm = document.getElementById('farmForm');
             if (!farmForm) console.error('Farm form not found');
             else console.log('Farm form loaded successfully');
+
+            // Setup tab navigation after DOM is fully loaded
+            setupTabNavigation();
         };
     </script>
 </body>
