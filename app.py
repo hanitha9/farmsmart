@@ -8,6 +8,7 @@ import os
 import hashlib
 import datetime
 import logging
+import numpy as np
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -103,6 +104,7 @@ MOTOR_THINGSPEAK_URL = "https://api.thingspeak.com/channels/2916541/feeds.json?a
 @app.route('/')
 def serve_index():
     try:
+        logger.info("Serving index.html")
         return send_from_directory('static', 'index.html')
     except Exception as e:
         logger.error(f"Error serving index.html: {e}")
@@ -113,6 +115,7 @@ def serve_index():
 def register():
     try:
         data = request.get_json()
+        logger.info(f"Register data: {data}")
         name = data['name']
         email = data['email']
         password = hashlib.sha256(data['password'].encode()).hexdigest()
@@ -123,8 +126,10 @@ def register():
             c.execute("INSERT INTO farmers (name, email, password) VALUES (?, ?, ?)", 
                      (name, email, password))
             conn.commit()
+            logger.info("User registered successfully")
             return jsonify({"message": "Registration successful! Please login."}), 201
         except sqlite3.IntegrityError:
+            logger.error("Email already exists")
             return jsonify({"error": "Email already exists"}), 400
         finally:
             conn.close()
@@ -137,6 +142,7 @@ def register():
 def login():
     try:
         data = request.get_json()
+        logger.info(f"Login data: {data}")
         email = data['email']
         password = hashlib.sha256(data['password'].encode()).hexdigest()
 
@@ -148,7 +154,9 @@ def login():
         conn.close()
 
         if user:
+            logger.info(f"Login successful for user ID: {user[0]}")
             return jsonify({"message": "Login successful", "farmer_id": user[0], "name": user[1]}), 200
+        logger.error("Login failed: Invalid credentials")
         return jsonify({"error": "Login failed"}), 401
     except Exception as e:
         logger.error(f"Login error: {e}")
@@ -209,7 +217,8 @@ def recommend():
             if crop_info.empty:
                 logger.warning(f"No nutrient data for crop: {crop}")
                 continue
-            nutrients = crop_info['Quantity (kg/acre)'].iloc[0]
+            # Convert int64 to Python int
+            nutrients = int(crop_info['Quantity (kg/acre)'].iloc[0])
             water_requirement = 5500 if crop == 'Paddy' else 3000
             cost = water_requirement * 10
             yield_est = 1000 if crop == 'Paddy' else 2000
@@ -234,7 +243,14 @@ def recommend():
         soil_adjust = {
             'Sandy Soil': 1.2,
             'Black Cotton Soil - Deep Black Soil': 0.8,
-            'Coastal Alluvial': 1.0
+            'Coastal Alluvial': 1.0,
+            'Loamy Soil': 1.0,
+            'Laterite Soil': 0.9,
+            'Red Sandy Loam - Fine Sandy Loam': 1.1,
+            'Red Sandy Loam - Coarse Sandy Loam': 1.1,
+            'Red Sandy Loam - Gravelly Sandy Loam': 1.2,
+            'Black Cotton Soil - Shallow Black Soil': 0.9,
+            'Black Cotton Soil - Medium Black Soil': 0.85
         }.get(soil_type, 1.0)
         total_water = base_water * soil_adjust
         schedule = []
@@ -269,6 +285,20 @@ def recommend():
             raise
         finally:
             conn.close()
+
+        # Ensure all numeric values are JSON serializable
+        for rec in recommendations:
+            for key, value in rec.items():
+                if isinstance(value, np.integer):
+                    rec[key] = int(value)
+                elif isinstance(value, np.floating):
+                    rec[key] = float(value)
+        for sch in schedule:
+            for key, value in sch.items():
+                if isinstance(value, np.integer):
+                    sch[key] = int(value)
+                elif isinstance(value, np.floating):
+                    sch[key] = float(value)
 
         return jsonify({
             "recommendations": recommendations,
