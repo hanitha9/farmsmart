@@ -68,11 +68,11 @@
                     </div>
                     <div class="mb-4">
                         <label class="block text-gray-700">Land Size (acres)</label>
-                        <input type="number" id="landSize" class="w-full p-2 border rounded" step="0.1" required>
+                        <input type="number" id="landSize" class="w-full p-2 border rounded" step="0.1" min="0.1" required>
                     </div>
                     <div class="mb-4">
                         <label class="block text-gray-700">Water Available (L)</label>
-                        <input type="number" id="waterAvailable" class="w-full p-2 border rounded" step="100">
+                        <input type="number" id="waterAvailable" class="w-full p-2 border rounded" step="100" min="0">
                     </div>
                     <div class="mb-4">
                         <label class="block text-gray-700">Start Date</label>
@@ -235,6 +235,11 @@
         // Handle farm form submission
         document.getElementById('farmForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            const farmError = document.getElementById('farmError');
+            const farmLoading = document.getElementById('farmLoading');
+            farmError.classList.add('hidden');
+            farmLoading.classList.remove('hidden');
+
             const data = {
                 farmer_id: farmerId,
                 location: document.getElementById('location').value,
@@ -243,6 +248,26 @@
                 start_date: document.getElementById('startDate').value,
                 water_available: parseFloat(document.getElementById('waterAvailable').value) || 0
             };
+
+            // Input validation
+            if (!data.location.trim()) {
+                farmError.textContent = 'Location is required';
+                farmError.classList.remove('hidden');
+                farmLoading.classList.add('hidden');
+                return;
+            }
+            if (data.land_size <= 0) {
+                farmError.textContent = 'Land size must be positive';
+                farmError.classList.remove('hidden');
+                farmLoading.classList.add('hidden');
+                return;
+            }
+            if (!data.start_date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                farmError.textContent = 'Invalid start date format (YYYY-MM-DD)';
+                farmError.classList.remove('hidden');
+                farmLoading.classList.add('hidden');
+                return;
+            }
             if (data.soil_option === 'manual') {
                 data.soil_type = document.getElementById('soilType').value;
             } else {
@@ -251,12 +276,25 @@
                 data.b = parseInt(document.getElementById('b').value);
                 data.ph = parseFloat(document.getElementById('ph').value);
                 data.ec = parseFloat(document.getElementById('ec').value);
+                if (data.r < 0 || data.r > 255 || data.g < 0 || data.g > 255 || data.b < 0 || data.b > 255) {
+                    farmError.textContent = 'RGB values must be between 0 and 255';
+                    farmError.classList.remove('hidden');
+                    farmLoading.classList.add('hidden');
+                    return;
+                }
+                if (data.ph < 0 || data.ph > 14) {
+                    farmError.textContent = 'pH must be between 0 and 14';
+                    farmError.classList.remove('hidden');
+                    farmLoading.classList.add('hidden');
+                    return;
+                }
+                if (data.ec < 0) {
+                    farmError.textContent = 'EC must be non-negative';
+                    farmError.classList.remove('hidden');
+                    farmLoading.classList.add('hidden');
+                    return;
+                }
             }
-
-            const farmError = document.getElementById('farmError');
-            const farmLoading = document.getElementById('farmLoading');
-            farmError.classList.add('hidden');
-            farmLoading.classList.remove('hidden');
 
             try {
                 const response = await fetch('/api/recommend', {
