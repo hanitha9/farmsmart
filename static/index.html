@@ -538,6 +538,9 @@
                 document.getElementById('recommendations-tab').classList.remove('hidden');
                 switchTab('recommendations');
                 setupTabNavigation();
+                // Add event listener specifically for the recommendations tab
+                const recommendationsTab = document.getElementById('recommendations');
+                recommendationsTab.addEventListener('click', handleCropSelection);
             } catch (err) {
                 farmLoading.classList.add('hidden');
                 farmError.textContent = 'Failed to connect to server: ' + err.message;
@@ -545,60 +548,65 @@
             }
         });
 
-        // Handle crop selection and navigate to schedule
-        document.addEventListener('click', async (e) => {
+        // Handle crop selection
+        function handleCropSelection(e) {
             const button = e.target.closest('.select-crop');
             if (button) {
-                selectedCrop = button.dataset.crop;
-                if (!selectedCrop) {
-                    console.error('Crop data attribute missing on button:', button);
+                e.preventDefault(); // Prevent any default behavior
+                const crop = button.getAttribute('data-crop');
+                console.log('Crop button clicked, crop:', crop);
+                if (!crop) {
+                    console.error('No data-crop attribute found on button:', button);
                     return;
                 }
-                console.log('Selected crop:', selectedCrop);
+
+                selectedCrop = crop;
+                console.log('Selected crop set to:', selectedCrop);
 
                 // Enable relevant tabs
                 document.getElementById('schedule-tab').classList.remove('hidden');
                 document.getElementById('moisture-tab').classList.remove('hidden');
                 document.getElementById('crop-details-tab').classList.remove('hidden');
 
-                try {
-                    const response = await fetch(`/api/crop_details?crop=${selectedCrop}`);
-                    const result = await response.json();
-                    if (!response.ok) {
-                        document.getElementById('cropDetails').innerHTML = `<p class="text-red-500">Failed to load crop details: ${result.error || 'Unknown error'}</p>`;
-                        return;
-                    }
-
-                    document.getElementById('crop-details').style.backgroundImage = `url('${result.image_url || 'https://via.placeholder.com/400'}')`;
-                    document.getElementById('cropDetails').innerHTML = `
-                        <div class="p-4 rounded-lg bg-black bg-opacity-50">
-                            <h4 class="font-bold text-lg">Scientific Name</h4>
-                            <p>${result.details["Scientific Name"] || 'N/A'}</p>
-                            <h4 class="font-bold text-lg mt-4">Growth Conditions</h4>
-                            <p>${result.details["Growth Conditions"] || 'N/A'}</p>
-                            <h4 class="font-bold text-lg mt-4">Soil Requirements</h4>
-                            <p>${result.details["Soil Requirements"] || 'N/A'}</p>
-                            <h4 class="font-bold text-lg mt-4">Water Needs</h4>
-                            <p>${result.details["Water Needs"] || 'N/A'}</p>
-                            <h4 class="font-bold text-lg mt-4">Care Tips</h4>
-                            <p>${result.details["Care Tips"] || 'N/A'}</p>
-                            <h4 class="font-bold text-lg mt-4">Pests and Diseases</h4>
-                            <p>${result.details["Pests and Diseases"] || 'N/A'}</p>
-                            <h4 class="font-bold text-lg mt-4">Harvest Time</h4>
-                            <p>${result.details["Harvest Time"] || 'N/A'}</p>
-                            <h4 class="font-bold text-lg mt-4">Yield Potential</h4>
-                            <p>${result.details["Yield Potential"] || 'N/A'}</p>
-                        </div>
-                    `;
-                } catch (err) {
-                    document.getElementById('cropDetails').innerHTML = `<p class="text-red-500">Network error: ${err.message}</p>`;
-                }
+                // Fetch crop details
+                fetch(`/api/crop_details?crop=${selectedCrop}`)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Failed to fetch crop details');
+                        return response.json();
+                    })
+                    .then(result => {
+                        document.getElementById('crop-details').style.backgroundImage = `url('${result.image_url || 'https://via.placeholder.com/400'}')`;
+                        document.getElementById('cropDetails').innerHTML = `
+                            <div class="p-4 rounded-lg bg-black bg-opacity-50">
+                                <h4 class="font-bold text-lg">Scientific Name</h4>
+                                <p>${result.details["Scientific Name"] || 'N/A'}</p>
+                                <h4 class="font-bold text-lg mt-4">Growth Conditions</h4>
+                                <p>${result.details["Growth Conditions"] || 'N/A'}</p>
+                                <h4 class="font-bold text-lg mt-4">Soil Requirements</h4>
+                                <p>${result.details["Soil Requirements"] || 'N/A'}</p>
+                                <h4 class="font-bold text-lg mt-4">Water Needs</h4>
+                                <p>${result.details["Water Needs"] || 'N/A'}</p>
+                                <h4 class="font-bold text-lg mt-4">Care Tips</h4>
+                                <p>${result.details["Care Tips"] || 'N/A'}</p>
+                                <h4 class="font-bold text-lg mt-4">Pests and Diseases</h4>
+                                <p>${result.details["Pests and Diseases"] || 'N/A'}</p>
+                                <h4 class="font-bold text-lg mt-4">Harvest Time</h4>
+                                <p>${result.details["Harvest Time"] || 'N/A'}</p>
+                                <h4 class="font-bold text-lg mt-4">Yield Potential</h4>
+                                <p>${result.details["Yield Potential"] || 'N/A'}</p>
+                            </div>
+                        `;
+                    })
+                    .catch(err => {
+                        console.error('Error fetching crop details:', err);
+                        document.getElementById('cropDetails').innerHTML = `<p class="text-red-500">Network error: ${err.message}</p>`;
+                    });
 
                 switchTab('schedule');
                 setupTabNavigation();
                 updateProgress();
             }
-        });
+        }
 
         // Generate water schedule
         document.getElementById('generateWaterSchedule').addEventListener('click', async () => {
