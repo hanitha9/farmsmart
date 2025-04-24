@@ -1,324 +1,386 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FarmSmart - Crop Recommendation System</title>
-  <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/axios@1.4.0/dist/axios.min.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/babel-standalone@7.22.5/babel.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FarmSmart - Precision Agriculture</title>
+    <!-- Base64 favicon to fix 404 error -->
+    <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAACYSURBVFhH7ZYxDoAgDEQ7///0YgqWdpA+2MJoO0iPFiJABbYJYUwC4Xme5zFKBZmZeV4a8xH4qYg6dQeR5wloZma+Av8K0Mzs9yD/BrCzswf5N4Cdne0g/wZwZ+eP5C8AOzv7kH8D2NnZG/k3gJ2dPZK/AOzs7IH8G8DOzh7k3wB2dvZA/g1gZ2cP5N8Adna2g/wbwM7OHuTfAHZ29kD+DWBNuLshOifhAAAAAElFTkSuQmCC">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
 </head>
-<body>
-  <div id="root"></div>
-  <script type="text/babel">
-    const { useState, useEffect } = React;
-
-    const NavBar = () => (
-      <nav className="bg-green-600 p-4 shadow-lg">
-        <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-white text-2xl font-bold">FarmSmart</h1>
-          <div className="space-x-4">
-            <a href="#home" className="text-white hover:text-green-200">Home</a>
-            <a href="#input" className="text-white hover:text-green-200">Input Data</a>
-            <a href="#recommendations" className="text-white hover:text-green-200">Recommendations</a>
-            <a href="#monitoring" className="text-white hover:text-green-200">Monitoring</a>
-            <a href="#logout" className="text-white hover:text-green-200" onClick={() => window.location.reload()}>Logout</a>
-          </div>
-        </div>
-      </nav>
-    );
-
-    const App = () => {
-      const [farmer, setFarmer] = useState({ name: '', email: '', password: '' });
-      const [isLoggedIn, setIsLoggedIn] = useState(false);
-      const [formData, setFormData] = useState({
-        location: '',
-        landSize: '',
-        soilOption: 'manual',
-        soilType: '',
-        r: '', g: '', b: '', ph: '', ec: '',
-        startDate: '',
-        waterAvailable: '8000',
-      });
-      const [recommendations, setRecommendations] = useState([]);
-      const [schedule, setSchedule] = useState([]);
-      const [monitoring, setMonitoring] = useState({ moisture: 'N/A', motorStatus: 'OFF', waterSupplied: 0 });
-      const [cropStage, setCropStage] = useState('Not Started');
-      const [selectedCrop, setSelectedCrop] = useState('');
-
-      const handleLogin = async () => {
-        try {
-          const response = await axios.post('/api/login', farmer);
-          if (response.data.success) {
-            setIsLoggedIn(true);
-            alert('Login successful!');
-          } else {
-            alert('Login failed.');
-          }
-        } catch (error) {
-          alert('Error during login.');
-        }
-      };
-
-      const handleRegister = async () => {
-        try {
-          const response = await axios.post('/api/register', farmer);
-          if (response.data.success) {
-            alert('Registration successful! Please login.');
-          } else {
-            alert('Registration failed.');
-          }
-        } catch (error) {
-          alert('Error during registration.');
-        }
-      };
-
-      const handleSubmit = async () => {
-        try {
-          const response = await axios.post('/api/recommend', formData);
-          setRecommendations(response.data.recommendations);
-          setSchedule(response.data.schedule);
-          setSelectedCrop(response.data.selectedCrop);
-          alert('Data submitted successfully!');
-        } catch (error) {
-          alert('Error submitting data.');
-        }
-      };
-
-      const fetchMonitoring = async () => {
-        try {
-          const response = await axios.get('/api/monitor');
-          setMonitoring(response.data);
-          if (formData.startDate) {
-            const start = new Date(formData.startDate);
-            const daysPassed = (new Date() - start) / (1000 * 60 * 60 * 24);
-            if (daysPassed < 30) setCropStage('Germination');
-            else if (daysPassed < 60) setCropStage('Vegetative Growth');
-            else if (daysPassed < 90) setCropStage('Flowering');
-            else setCropStage('Harvesting');
-          }
-        } catch (error) {
-          console.error('Error fetching monitoring data.');
-        }
-      };
-
-      useEffect(() => {
-        if (isLoggedIn) {
-          fetchMonitoring();
-          const interval = setInterval(fetchMonitoring, 30000);
-          return () => clearInterval(interval);
-        }
-      }, [isLoggedIn]);
-
-      if (!isLoggedIn) {
-        return (
-          <div className="min-h-screen bg-gray-100">
-            <NavBar />
-            <div className="container mx-auto p-6">
-              <h2 className="text-3xl font-bold text-center mb-6">Login / Register</h2>
-              <div className="max-w-md mx-auto bg-white p-6 rounded-lg shadow-lg">
-                <input
-                  type="text"
-                  placeholder="Name"
-                  className="w-full p-2 mb-4 border rounded"
-                  onChange={(e) => setFarmer({ ...farmer, name: e.target.value })}
-                />
-                <input
-                  type="email"
-                  placeholder="Email"
-                  className="w-full p-2 mb-4 border rounded"
-                  onChange={(e) => setFarmer({ ...farmer, email: e.target.value })}
-                />
-                <input
-                  type="password"
-                  placeholder="Password"
-                  className="w-full p-2 mb-4 border rounded"
-                  onChange={(e) => setFarmer({ ...farmer, password: e.target.value })}
-                />
-                <div className="flex justify-between">
-                  <button
-                    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-                    onClick={handleLogin}
-                  >
-                    Login
-                  </button>
-                  <button
-                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                    onClick={handleRegister}
-                  >
-                    Register
-                  </button>
-                </div>
-              </div>
+<body class="bg-gray-100">
+    <!-- Navbar -->
+    <nav class="bg-green-600 text-white p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold">FarmSmart</h1>
+            <div>
+                <button id="logoutBtn" class="hidden bg-red-500 hover:bg-red-600 px-4 py-2 rounded">Logout</button>
             </div>
-          </div>
-        );
-      }
-
-      return (
-        <div className="min-h-screen bg-gray-100">
-          <NavBar />
-          <div className="container mx-auto p-6">
-            <section id="input" className="mb-12">
-              <h2 className="text-3xl font-bold text-center mb-6">Enter Farm Details</h2>
-              <div className="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-lg">
-                <select
-                  className="w-full p-2 mb-4 border rounded"
-                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                >
-                  <option value="">Select Location</option>
-                  <option value="Plains">Plains</option>
-                  <option value="Coastal Region">Coastal Region</option>
-                  <option value="Arid Zone">Arid Zone</option>
-                  <option value="Hilly Area">Hilly Area</option>
-                </select>
-                <input
-                  type="number"
-                  placeholder="Land Size (acres)"
-                  className="w-full p-2 mb-4 border rounded"
-                  onChange={(e) => setFormData({ ...formData, landSize: e.target.value })}
-                />
-                <select
-                  className="w-full p-2 mb-4 border rounded"
-                  onChange={(e) => setFormData({ ...formData, soilOption: e.target.value })}
-                >
-                  <option value="manual">Manual Soil Type</option>
-                  <option value="sensor">Sensor (RGB/EC)</option>
-                </select>
-                {formData.soilOption === 'manual' ? (
-                  <select
-                    className="w-full p-2 mb-4 border rounded"
-                    onChange={(e) => setFormData({ ...formData, soilType: e.target.value })}
-                  >
-                    <option value="">Select Soil Type</option>
-                    <option value="Red Sandy Loam">Red Sandy Loam</option>
-                    <option value="Black Cotton Soil">Black Cotton Soil</option>
-                    <option value="Coastal Alluvial">Coastal Alluvial</option>
-                    <option value="Laterite Soil">Laterite Soil</option>
-                    <option value="Loamy Soil">Loamy Soil</option>
-                    <option value="Sandy Soil">Sandy Soil</option>
-                  </select>
-                ) : (
-                  <div className="grid grid-cols-2 gap-4 mb-4">
-                    <input
-                      type="number"
-                      placeholder="R Value"
-                      className="p-2 border rounded"
-                      onChange={(e) => setFormData({ ...formData, r: e.target.value })}
-                    />
-                    <input
-                      type="number"
-                      placeholder="G Value"
-                      className="p-2 border rounded"
-                      onChange={(e) => setFormData({ ...formData, g: e.target.value })}
-                    />
-                    <input
-                      type="number"
-                      placeholder="B Value"
-                      className="p-2 border rounded"
-                      onChange={(e) => setFormData({ ...formData, b: e.target.value })}
-                    />
-                    <input
-                      type="number"
-                      placeholder="pH Value"
-                      className="p-2 border rounded"
-                      onChange={(e) => setFormData({ ...formData, ph: e.target.value })}
-                    />
-                    <input
-                      type="number"
-                      placeholder="EC Value (dS/m)"
-                      className="p-2 border rounded"
-                      onChange={(e) => setFormData({ ...formData, ec: e.target.value })}
-                    />
-                  </div>
-                )}
-                <input
-                  type="date"
-                  className="w-full p-2 mb-4 border rounded"
-                  onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                />
-                <button
-                  className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700"
-                  onClick={handleSubmit}
-                >
-                  Submit
-                </button>
-              </div>
-            </section>
-
-            <section id="recommendations" className="mb-12">
-              <h2 className="text-3xl font-bold text-center mb-6">Crop Recommendations</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {recommendations.map((rec, index) => (
-                  <div key={index} className="bg-white p-6 rounded-lg shadow-lg">
-                    <h3 className="text-xl font-bold mb-2">{rec.Crop}</h3>
-                    <p><strong>Cost (per acre):</strong> ${rec['Estimated Cost (per acre)']}</p>
-                    <p><strong>Yield (kg/acre):</strong> {rec['Estimated Yield (kg/acre)']}</p>
-                    <p><strong>Market Trend:</strong> {rec['Market Trend (0-1)'].toFixed(2)}</p>
-                    <p><strong>Water Requirement:</strong> {rec['Water Requirement (L/acre/day)']} L/day</p>
-                    <p><strong>Nutrients:</strong> {rec['Nutrient Qty (kg/acre)']} kg/acre</p>
-                  </div>
-                ))}
-              </div>
-              {schedule.length > 0 && (
-                <div className="mt-8">
-                  <h3 className="text-2xl font-bold text-center mb-4">Watering Schedule for {selectedCrop}</h3>
-                  <div className="overflow-x-auto">
-                    <table className="w-full bg-white shadow-lg rounded-lg">
-                      <thead>
-                        <tr className="bg-green-600 text-white">
-                          <th className="p-3">Day</th>
-                          <th className="p-3">Time</th>
-                          <th className="p-3">Water (L)</th>
-                          <th className="p-3">Method</th>
-                          <th className="p-3">Speed</th>
-                          <th className="p-3">Duration (min)</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {schedule.map((day, index) => (
-                          <tr key={index} className="border-b">
-                            <td className="p-3">{day.Day}</td>
-                            <td className="p-3">{day.Time}</td>
-                            <td className="p-3">{day['Water Quantity (L)']}</td>
-                            <td className="p-3">{day.Method}</td>
-                            <td className="p-3">{day.Speed}</td>
-                            <td className="p-3">{day['Duration (min)']}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-            </section>
-
-            <section id="monitoring" className="mb-12">
-              <h2 className="text-3xl font-bold text-center mb-6">Crop Monitoring</h2>
-              <div className="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-lg">
-                <p><strong>Soil Moisture:</strong> {monitoring.moisture}</p>
-                <p><strong>Motor Status:</strong> {monitoring.motorStatus}</p>
-                <p><strong>Water Supplied:</strong> {monitoring.waterSupplied.toFixed(2)} L</p>
-                <p><strong>Crop Stage:</strong> {cropStage}</p>
-                <div className="mt-4">
-                  <h3 className="text-lg font-bold">Crop Progress</h3>
-                  <div className="w-full bg-gray-200 rounded-full h-4">
-                    <div
-                      className="bg-green-600 h-4 rounded-full"
-                      style={{ width: `${cropStage === 'Germination' ? 25 : cropStage === 'Vegetative Growth' ? 50 : cropStage === 'Flowering' ? 75 : 100}%` }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
-            </section>
-          </div>
         </div>
-      );
-    };
+    </nav>
 
-    ReactDOM.render(<App />, document.getElementById('root'));
-  </script>
+    <!-- Main Container -->
+    <div class="container mx-auto p-4">
+        <!-- Auth Section -->
+        <div id="authSection" class="bg-white p-6 rounded shadow-md max-w-md mx-auto">
+            <h2 id="authTitle" class="text-2xl font-bold mb-4 text-center">Login</h2>
+            <form id="authForm">
+                <div id="nameField" class="mb-4 hidden">
+                    <label class="block text-gray-700">Name</label>
+                    <input type="text" id="name" class="w-full p-2 border rounded" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700">Email</label>
+                    <input type="email" id="email" class="w-full p-2 border rounded" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700">Password</label>
+                    <input type="password" id="password" class="w-full p-2 border rounded" required>
+                </div>
+                <button type="submit" id="authSubmit" class="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700">Login</button>
+            </form>
+            <p class="mt-4 text-center">
+                <a id="toggleAuth" href="#" class="text-green-600 hover:underline">Register instead</a>
+            </p>
+            <div id="authError" class="text-red-500 mt-4 hidden"></div>
+            <div id="authLoading" class="text-center mt-4 hidden">Loading...</div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboard" class="hidden">
+            <h2 class="text-2xl font-bold mb-4">FarmSmart Dashboard</h2>
+            <!-- Farm Input Section -->
+            <div class="bg-white p-6 rounded shadow-md mb-6">
+                <h3 class="text-xl font-bold mb-4">Enter Farm Details</h3>
+                <form id="farmForm">
+                    <div class="mb-4">
+                        <label class="block text-gray-700">Location</label>
+                        <input type="text" id="location" class="w-full p-2 border rounded" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700">Land Size (acres)</label>
+                        <input type="number" id="landSize" class="w-full p-2 border rounded" step="0.1" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700">Water Available (L)</label>
+                        <input type="number" id="waterAvailable" class="w-full p-2 border rounded" step="100">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700">Start Date</label>
+                        <input type="date" id="startDate" class="w-full p-2 border rounded" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700">Soil Input Method</label>
+                        <select id="soilOption" class="w-full p-2 border rounded" onchange="toggleSoilInput()">
+                            <option value="manual">Manual Selection</option>
+                            <option value="sensor">Sensor Input</option>
+                        </select>
+                    </div>
+                    <!-- Manual Soil Selection -->
+                    <div id="manualSoil" class="mb-4">
+                        <label class="block text-gray-700">Soil Type</label>
+                        <select id="soilType" class="w-full p-2 border rounded" required>
+                            <option value="Coastal Alluvial">Coastal Alluvial</option>
+                            <option value="Sandy Soil">Sandy Soil</option>
+                            <option value="Loamy Soil">Loamy Soil</option>
+                            <option value="Laterite Soil">Laterite Soil</option>
+                            <option value="Red Sandy Loam - Fine Sandy Loam">Red Sandy Loam - Fine Sandy Loam</option>
+                            <option value="Red Sandy Loam - Coarse Sandy Loam">Red Sandy Loam - Coarse Sandy Loam</option>
+                            <option value="Red Sandy Loam - Gravelly Sandy Loam">Red Sandy Loam - Gravelly Sandy Loam</option>
+                            <option value="Black Cotton Soil - Shallow Black Soil">Black Cotton Soil - Shallow Black Soil</option>
+                            <option value="Black Cotton Soil - Medium Black Soil">Black Cotton Soil - Medium Black Soil</option>
+                            <option value="Black Cotton Soil - Deep Black Soil">Black Cotton Soil - Deep Black Soil</option>
+                        </select>
+                    </div>
+                    <!-- Sensor Soil Input -->
+                    <div id="sensorSoil" class="hidden">
+                        <div class="mb-4">
+                            <label class="block text-gray-700">R (0-255)</label>
+                            <input type="number" id="r" class="w-full p-2 border rounded" min="0" max="255" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700">G (0-255)</label>
+                            <input type="number" id="g" class="w-full p-2 border rounded" min="0" max="255" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700">B (0-255)</label>
+                            <input type="number" id="b" class="w-full p-2 border rounded" min="0" max="255" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700">pH (0-14)</label>
+                            <input type="number" id="ph" class="w-full p-2 border rounded" step="0.1" min="0" max="14" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700">EC (mS/cm)</label>
+                            <input type="number" id="ec" class="w-full p-2 border rounded" step="0.01" min="0" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700">Get Recommendations</button>
+                </form>
+                <div id="farmError" class="text-red-500 mt-4 hidden"></div>
+                <div id="farmLoading" class="text-center mt-4 hidden">Loading...</div>
+            </div>
+            <!-- Recommendations Section -->
+            <div id="recommendationsSection" class="bg-white p-6 rounded shadow-md mb-6 hidden">
+                <h3 class="text-xl font-bold mb-4">Crop Recommendations</h3>
+                <div id="recommendations"></div>
+            </div>
+            <!-- Schedule Section -->
+            <div id="scheduleSection" class="bg-white p-6 rounded shadow-md mb-6 hidden">
+                <h3 class="text-xl font-bold mb-4">Watering Schedule</h3>
+                <div id="schedule"></div>
+            </div>
+            <!-- Monitoring Section -->
+            <div id="monitoringSection" class="bg-white p-6 rounded shadow-md hidden">
+                <h3 class="text-xl font-bold mb-4">Farm Monitoring</h3>
+                <button id="refreshMonitoring" class="bg-green-600 text-white p-2 rounded hover:bg-green-700 mb-4">Refresh Data</button>
+                <div id="monitoring"></div>
+                <div id="monitoringError" class="text-red-500 mt-4 hidden"></div>
+                <div id="monitoringLoading" class="text-center mt-4 hidden">Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let farmerId = null;
+
+        // Toggle between login and register
+        const toggleAuth = document.getElementById('toggleAuth');
+        const authTitle = document.getElementById('authTitle');
+        const authSubmit = document.getElementById('authSubmit');
+        const nameField = document.getElementById('nameField');
+        toggleAuth.addEventListener('click', (e) => {
+            e.preventDefault();
+            const isLogin = authTitle.textContent === 'Login';
+            authTitle.textContent = isLogin ? 'Register' : 'Login';
+            authSubmit.textContent = isLogin ? 'Register' : 'Login';
+            toggleAuth.textContent = isLogin ? 'Login instead' : 'Register instead';
+            nameField.classList.toggle('hidden', !isLogin);
+        });
+
+        // Handle auth form submission
+        document.getElementById('authForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const isLogin = authTitle.textContent === 'Login';
+            const endpoint = isLogin ? '/api/login' : '/api/register';
+            const data = {
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value
+            };
+            if (!isLogin) {
+                data.name = document.getElementById('name').value;
+            }
+
+            const authError = document.getElementById('authError');
+            const authLoading = document.getElementById('authLoading');
+            authError.classList.add('hidden');
+            authLoading.classList.remove('hidden');
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                authLoading.classList.add('hidden');
+
+                if (!response.ok) {
+                    authError.textContent = result.error || 'Authentication failed';
+                    authError.classList.remove('hidden');
+                    return;
+                }
+
+                if (isLogin) {
+                    farmerId = result.farmer_id;
+                    document.getElementById('authSection').classList.add('hidden');
+                    document.getElementById('dashboard').classList.remove('hidden');
+                    document.getElementById('logoutBtn').classList.remove('hidden');
+                    loadMonitoring();
+                } else {
+                    authError.textContent = result.message;
+                    authError.classList.remove('hidden');
+                    authError.classList.remove('text-red-500');
+                    authError.classList.add('text-green-500');
+                }
+            } catch (err) {
+                authLoading.classList.add('hidden');
+                authError.textContent = 'Network error occurred';
+                authError.classList.remove('hidden');
+            }
+        });
+
+        // Toggle soil input method
+        function toggleSoilInput() {
+            const soilOption = document.getElementById('soilOption').value;
+            document.getElementById('manualSoil').classList.toggle('hidden', soilOption !== 'manual');
+            document.getElementById('sensorSoil').classList.toggle('hidden', soilOption !== 'sensor');
+            document.getElementById('soilType').required = soilOption === 'manual';
+            document.getElementById('r').required = soilOption === 'sensor';
+            document.getElementById('g').required = soilOption === 'sensor';
+            document.getElementById('b').required = soilOption === 'sensor';
+            document.getElementById('ph').required = soilOption === 'sensor';
+            document.getElementById('ec').required = soilOption === 'sensor';
+        }
+
+        // Handle farm form submission
+        document.getElementById('farmForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                farmer_id: farmerId,
+                location: document.getElementById('location').value,
+                land_size: parseFloat(document.getElementById('landSize').value),
+                soil_option: document.getElementById('soilOption').value,
+                start_date: document.getElementById('startDate').value,
+                water_available: parseFloat(document.getElementById('waterAvailable').value) || 0
+            };
+            if (data.soil_option === 'manual') {
+                data.soil_type = document.getElementById('soilType').value;
+            } else {
+                data.r = parseInt(document.getElementById('r').value);
+                data.g = parseInt(document.getElementById('g').value);
+                data.b = parseInt(document.getElementById('b').value);
+                data.ph = parseFloat(document.getElementById('ph').value);
+                data.ec = parseFloat(document.getElementById('ec').value);
+            }
+
+            const farmError = document.getElementById('farmError');
+            const farmLoading = document.getElementById('farmLoading');
+            farmError.classList.add('hidden');
+            farmLoading.classList.remove('hidden');
+
+            try {
+                const response = await fetch('/api/recommend', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                farmLoading.classList.add('hidden');
+
+                if (!response.ok) {
+                    farmError.textContent = result.error || 'Failed to get recommendations';
+                    farmError.classList.remove('hidden');
+                    return;
+                }
+
+                // Display recommendations
+                const recommendations = document.getElementById('recommendations');
+                recommendations.innerHTML = `
+                    <p><strong>Soil Type:</strong> ${result.soil_type}</p>
+                    <h4 class="font-bold mt-4">Recommended Crops:</h4>
+                    <ul class="list-disc pl-5">
+                        ${result.recommendations.map(r => `
+                            <li>
+                                <strong>${r.crop}</strong>: 
+                                Nutrients: ${r.nutrients} kg/acre, 
+                                Water: ${r.water_requirement} L/acre, 
+                                Cost: ${r.cost}, 
+                                Yield: ${r.yield}, 
+                                Market Trend: ${r.market_trend}
+                            </li>
+                        `).join('')}
+                    </ul>
+                `;
+                document.getElementById('recommendationsSection').classList.remove('hidden');
+
+                // Display schedule
+                const schedule = document.getElementById('schedule');
+                schedule.innerHTML = `
+                    <table class="w-full border-collapse border">
+                        <thead>
+                            <tr class="bg-gray-200">
+                                <th class="border p-2">Day</th>
+                                <th class="border p-2">Time</th>
+                                <th class="border p-2">Water Quantity (L)</th>
+                                <th class="border p-2">Method</th>
+                                <th class="border p-2">Speed</th>
+                                <th class="border p-2">Duration</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${result.schedule.map(s => `
+                                <tr>
+                                    <td class="border p-2">${s.day}</td>
+                                    <td class="border p-2">${s.time}</td>
+                                    <td class="border p-2">${s.water_quantity}</td>
+                                    <td class="border p-2">${s.method}</td>
+                                    <td class="border p-2">${s.speed}</td>
+                                    <td class="border p-2">${s.duration}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+                document.getElementById('scheduleSection').classList.remove('hidden');
+
+                loadMonitoring();
+            } catch (err) {
+                farmLoading.classList.add('hidden');
+                farmError.textContent = 'Network error occurred';
+                farmError.classList.remove('hidden');
+            }
+        });
+
+        // Load monitoring data
+        async function loadMonitoring() {
+            if (!farmerId) return;
+            const monitoringError = document.getElementById('monitoringError');
+            const monitoringLoading = document.getElementById('monitoringLoading');
+            monitoringError.classList.add('hidden');
+            monitoringLoading.classList.remove('hidden');
+
+            try {
+                const response = await fetch(`/api/monitor?farmer_id=${farmerId}`);
+                const result = await response.json();
+                monitoringLoading.classList.add('hidden');
+
+                if (!response.ok) {
+                    monitoringError.textContent = result.error || 'Failed to fetch monitoring data';
+                    monitoringError.classList.remove('hidden');
+                    return;
+                }
+
+                const monitoring = document.getElementById('monitoring');
+                monitoring.innerHTML = `
+                    <p><strong>Moisture Level:</strong> ${result.moisture}</p>
+                    <p><strong>Motor Status:</strong> ${result.motor_status}</p>
+                    <p><strong>Water Supplied:</strong> ${result.water_supplied} L</p>
+                    <p><strong>Crop Stage:</strong> ${result.crop_stage}</p>
+                    <p><strong>Progress:</strong> ${result.progress}%</p>
+                `;
+                document.getElementById('monitoringSection').classList.remove('hidden');
+            } catch (err) {
+                monitoringLoading.classList.add('hidden');
+                monitoringError.textContent = 'Network error occurred';
+                monitoringError.classList.remove('hidden');
+            }
+        }
+
+        // Refresh monitoring data
+        document.getElementById('refreshMonitoring').addEventListener('click', loadMonitoring);
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            farmerId = null;
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('authSection').classList.remove('hidden');
+            document.getElementById('logoutBtn').classList.add('hidden');
+            document.getElementById('authForm').reset();
+            authTitle.textContent = 'Login';
+            authSubmit.textContent = 'Login';
+            toggleAuth.textContent = 'Register instead';
+            nameField.classList.add('hidden');
+        });
+    </script>
 </body>
 </html>
