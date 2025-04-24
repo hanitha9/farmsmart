@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FarmSmart - Crop Recommendation System</title>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.4.0/dist/axios.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/babel-standalone@7.22.5/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    const NavBar = () => (
+      <nav className="bg-green-600 p-4 shadow-lg">
+        <div className="container mx-auto flex justify-between items-center">
+          <h1 className="text-white text-2xl font-bold">FarmSmart</h1>
+          <div className="space-x-4">
+            <a href="#home" className="text-white hover:text-green-200">Home</a>
+            <a href="#input" className="text-white hover:text-green-200">Input Data</a>
+            <a href="#recommendations" className="text-white hover:text-green-200">Recommendations</a>
+            <a href="#monitoring" className="text-white hover:text-green-200">Monitoring</a>
+            <a href="#logout" className="text-white hover:text-green-200" onClick={() => window.location.reload()}>Logout</a>
+          </div>
+        </div>
+      </nav>
+    );
+
+    const App = () => {
+      const [farmer, setFarmer] = useState({ name: '', email: '', password: '' });
+      const [isLoggedIn, setIsLoggedIn] = useState(false);
+      const [formData, setFormData] = useState({
+        location: '',
+        landSize: '',
+        soilOption: 'manual',
+        soilType: '',
+        r: '', g: '', b: '', ph: '', ec: '',
+        startDate: '',
+        waterAvailable: '8000',
+      });
+      const [recommendations, setRecommendations] = useState([]);
+      const [schedule, setSchedule] = useState([]);
+      const [monitoring, setMonitoring] = useState({ moisture: 'N/A', motorStatus: 'OFF', waterSupplied: 0 });
+      const [cropStage, setCropStage] = useState('Not Started');
+      const [selectedCrop, setSelectedCrop] = useState('');
+
+      const handleLogin = async () => {
+        try {
+          const response = await axios.post('/api/login', farmer);
+          if (response.data.success) {
+            setIsLoggedIn(true);
+            alert('Login successful!');
+          } else {
+            alert('Login failed.');
+          }
+        } catch (error) {
+          alert('Error during login.');
+        }
+      };
+
+      const handleRegister = async () => {
+        try {
+          const response = await axios.post('/api/register', farmer);
+          if (response.data.success) {
+            alert('Registration successful! Please login.');
+          } else {
+            alert('Registration failed.');
+          }
+        } catch (error) {
+          alert('Error during registration.');
+        }
+      };
+
+      const handleSubmit = async () => {
+        try {
+          const response = await axios.post('/api/recommend', formData);
+          setRecommendations(response.data.recommendations);
+          setSchedule(response.data.schedule);
+          setSelectedCrop(response.data.selectedCrop);
+          alert('Data submitted successfully!');
+        } catch (error) {
+          alert('Error submitting data.');
+        }
+      };
+
+      const fetchMonitoring = async () => {
+        try {
+          const response = await axios.get('/api/monitor');
+          setMonitoring(response.data);
+          if (formData.startDate) {
+            const start = new Date(formData.startDate);
+            const daysPassed = (new Date() - start) / (1000 * 60 * 60 * 24);
+            if (daysPassed < 30) setCropStage('Germination');
+            else if (daysPassed < 60) setCropStage('Vegetative Growth');
+            else if (daysPassed < 90) setCropStage('Flowering');
+            else setCropStage('Harvesting');
+          }
+        } catch (error) {
+          console.error('Error fetching monitoring data.');
+        }
+      };
+
+      useEffect(() => {
+        if (isLoggedIn) {
+          fetchMonitoring();
+          const interval = setInterval(fetchMonitoring, 30000);
+          return () => clearInterval(interval);
+        }
+      }, [isLoggedIn]);
+
+      if (!isLoggedIn) {
+        return (
+          <div className="min-h-screen bg-gray-100">
+            <NavBar />
+            <div className="container mx-auto p-6">
+              <h2 className="text-3xl font-bold text-center mb-6">Login / Register</h2>
+              <div className="max-w-md mx-auto bg-white p-6 rounded-lg shadow-lg">
+                <input
+                  type="text"
+                  placeholder="Name"
+                  className="w-full p-2 mb-4 border rounded"
+                  onChange={(e) => setFarmer({ ...farmer, name: e.target.value })}
+                />
+                <input
+                  type="email"
+                  placeholder="Email"
+                  className="w-full p-2 mb-4 border rounded"
+                  onChange={(e) => setFarmer({ ...farmer, email: e.target.value })}
+                />
+                <input
+                  type="password"
+                  placeholder="Password"
+                  className="w-full p-2 mb-4 border rounded"
+                  onChange={(e) => setFarmer({ ...farmer, password: e.target.value })}
+                />
+                <div className="flex justify-between">
+                  <button
+                    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                    onClick={handleLogin}
+                  >
+                    Login
+                  </button>
+                  <button
+                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                    onClick={handleRegister}
+                  >
+                    Register
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="min-h-screen bg-gray-100">
+          <NavBar />
+          <div className="container mx-auto p-6">
+            <section id="input" className="mb-12">
+              <h2 className="text-3xl font-bold text-center mb-6">Enter Farm Details</h2>
+              <div className="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-lg">
+                <select
+                  className="w-full p-2 mb-4 border rounded"
+                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                >
+                  <option value="">Select Location</option>
+                  <option value="Plains">Plains</option>
+                  <option value="Coastal Region">Coastal Region</option>
+                  <option value="Arid Zone">Arid Zone</option>
+                  <option value="Hilly Area">Hilly Area</option>
+                </select>
+                <input
+                  type="number"
+                  placeholder="Land Size (acres)"
+                  className="w-full p-2 mb-4 border rounded"
+                  onChange={(e) => setFormData({ ...formData, landSize: e.target.value })}
+                />
+                <select
+                  className="w-full p-2 mb-4 border rounded"
+                  onChange={(e) => setFormData({ ...formData, soilOption: e.target.value })}
+                >
+                  <option value="manual">Manual Soil Type</option>
+                  <option value="sensor">Sensor (RGB/EC)</option>
+                </select>
+                {formData.soilOption === 'manual' ? (
+                  <select
+                    className="w-full p-2 mb-4 border rounded"
+                    onChange={(e) => setFormData({ ...formData, soilType: e.target.value })}
+                  >
+                    <option value="">Select Soil Type</option>
+                    <option value="Red Sandy Loam">Red Sandy Loam</option>
+                    <option value="Black Cotton Soil">Black Cotton Soil</option>
+                    <option value="Coastal Alluvial">Coastal Alluvial</option>
+                    <option value="Laterite Soil">Laterite Soil</option>
+                    <option value="Loamy Soil">Loamy Soil</option>
+                    <option value="Sandy Soil">Sandy Soil</option>
+                  </select>
+                ) : (
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <input
+                      type="number"
+                      placeholder="R Value"
+                      className="p-2 border rounded"
+                      onChange={(e) => setFormData({ ...formData, r: e.target.value })}
+                    />
+                    <input
+                      type="number"
+                      placeholder="G Value"
+                      className="p-2 border rounded"
+                      onChange={(e) => setFormData({ ...formData, g: e.target.value })}
+                    />
+                    <input
+                      type="number"
+                      placeholder="B Value"
+                      className="p-2 border rounded"
+                      onChange={(e) => setFormData({ ...formData, b: e.target.value })}
+                    />
+                    <input
+                      type="number"
+                      placeholder="pH Value"
+                      className="p-2 border rounded"
+                      onChange={(e) => setFormData({ ...formData, ph: e.target.value })}
+                    />
+                    <input
+                      type="number"
+                      placeholder="EC Value (dS/m)"
+                      className="p-2 border rounded"
+                      onChange={(e) => setFormData({ ...formData, ec: e.target.value })}
+                    />
+                  </div>
+                )}
+                <input
+                  type="date"
+                  className="w-full p-2 mb-4 border rounded"
+                  onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                />
+                <button
+                  className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700"
+                  onClick={handleSubmit}
+                >
+                  Submit
+                </button>
+              </div>
+            </section>
+
+            <section id="recommendations" className="mb-12">
+              <h2 className="text-3xl font-bold text-center mb-6">Crop Recommendations</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {recommendations.map((rec, index) => (
+                  <div key={index} className="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 className="text-xl font-bold mb-2">{rec.Crop}</h3>
+                    <p><strong>Cost (per acre):</strong> ${rec['Estimated Cost (per acre)']}</p>
+                    <p><strong>Yield (kg/acre):</strong> {rec['Estimated Yield (kg/acre)']}</p>
+                    <p><strong>Market Trend:</strong> {rec['Market Trend (0-1)'].toFixed(2)}</p>
+                    <p><strong>Water Requirement:</strong> {rec['Water Requirement (L/acre/day)']} L/day</p>
+                    <p><strong>Nutrients:</strong> {rec['Nutrient Qty (kg/acre)']} kg/acre</p>
+                  </div>
+                ))}
+              </div>
+              {schedule.length > 0 && (
+                <div className="mt-8">
+                  <h3 className="text-2xl font-bold text-center mb-4">Watering Schedule for {selectedCrop}</h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full bg-white shadow-lg rounded-lg">
+                      <thead>
+                        <tr className="bg-green-600 text-white">
+                          <th className="p-3">Day</th>
+                          <th className="p-3">Time</th>
+                          <th className="p-3">Water (L)</th>
+                          <th className="p-3">Method</th>
+                          <th className="p-3">Speed</th>
+                          <th className="p-3">Duration (min)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {schedule.map((day, index) => (
+                          <tr key={index} className="border-b">
+                            <td className="p-3">{day.Day}</td>
+                            <td className="p-3">{day.Time}</td>
+                            <td className="p-3">{day['Water Quantity (L)']}</td>
+                            <td className="p-3">{day.Method}</td>
+                            <td className="p-3">{day.Speed}</td>
+                            <td className="p-3">{day['Duration (min)']}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </section>
+
+            <section id="monitoring" className="mb-12">
+              <h2 className="text-3xl font-bold text-center mb-6">Crop Monitoring</h2>
+              <div className="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-lg">
+                <p><strong>Soil Moisture:</strong> {monitoring.moisture}</p>
+                <p><strong>Motor Status:</strong> {monitoring.motorStatus}</p>
+                <p><strong>Water Supplied:</strong> {monitoring.waterSupplied.toFixed(2)} L</p>
+                <p><strong>Crop Stage:</strong> {cropStage}</p>
+                <div className="mt-4">
+                  <h3 className="text-lg font-bold">Crop Progress</h3>
+                  <div className="w-full bg-gray-200 rounded-full h-4">
+                    <div
+                      className="bg-green-600 h-4 rounded-full"
+                      style={{ width: `${cropStage === 'Germination' ? 25 : cropStage === 'Vegetative Growth' ? 50 : cropStage === 'Flowering' ? 75 : 100}%` }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      );
+    };
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
