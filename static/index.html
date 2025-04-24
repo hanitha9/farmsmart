@@ -518,9 +518,9 @@
                 const recommendationsList = document.getElementById('recommendationsList');
                 // Filter out wheat and limit to 3 vegetable recommendations
                 const filteredRecommendations = [
-                    { crop: 'brinjal', image_url: 'DWylossWLPk7YifYkn1N1LE9YsSY9gHtQ3moGO1WLFimuOXRT7DX1OWyPosQ0WLFvjJ2WmF5rlavcsWKn2GCuK8WLEBD/9k=', nutrients: '50 kg/acre', water_requirement: '300 L/acre', cost: '$200', yield: '2000 kg/acre', market_trend: 'Stable' },
-                    { crop: 'tomato', image_url: 'dmdLUsg6pUqsH8QQdUIthD1BA1CnYLepZzv0WwW9QyTalRsFyuOmrUemJlYVmtRekVpWg8kheNTYJiW0De2jkELQdSplN44IhFIbUlW1uwVOyty7l2Eg0V1wkeiP3lL6yyNVZC9Qq/VFxsNSmKrAqVgBPUa+SfGAl2lBqbo9iEytOxOzEALmsFadg3dP3bbAJkY4RnTnueRDiLXON76pscIU0cipDYXUNnH/2Q==', nutrients: '60 kg/acre', water_requirement: '400 L/acre', cost: '$250', yield: '2500 kg/acre', market_trend: 'Rising' },
-                    { crop: 'okra', image_url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQKf_ZaPEZUSeG74J4IQfiCAcEnWclp13LxDGAHKK519i3JpYSArxyjDQXGmafVOxOOxu4&usqp=CAU', nutrients: '45 kg/acre', water_requirement: '350 L/acre', cost: '$180', yield: '1800 kg/acre', market_trend: 'Stable' }
+                    { crop: 'Brinjal', image_url: 'DWylossWLPk7YifYkn1N1LE9YsSY9gHtQ3moGO1WLFimuOXRT7DX1OWyPosQ0WLFvjJ2WmF5rlavcsWKn2GCuK8WLEBD/9k=', nutrients: '50 kg/acre', water_requirement: '300 L/acre', cost: '$200', yield: '2000 kg/acre', market_trend: 'Stable' },
+                    { crop: 'Tomato', image_url: 'dmdLUsg6pUqsH8QQdUIthD1BA1CnYLepZzv0WwW9QyTalRsFyuOmrUemJlYVmtRekVpWg8kheNTYJiW0De2jkELQdSplN44IhFIbUlW1uwVOyty7l2Eg0V1wkeiP3lL6yyNVZC9Qq/VFxsNSmKrAqVgBPUa+SfGAl2lBqbo9iEytOxOzEALmsFadg3dP3bbAJkY4RnTnueRDiLXON76pscIU0cipDYXUNnH/2Q==', nutrients: '60 kg/acre', water_requirement: '400 L/acre', cost: '$250', yield: '2500 kg/acre', market_trend: 'Rising' },
+                    { crop: 'Okra', image_url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQKf_ZaPEZUSeG74J4IQfiCAcEnWclp13LxDGAHKK519i3JpYSArxyjDQXGmafVOxOOxu4&usqp=CAU', nutrients: '45 kg/acre', water_requirement: '350 L/acre', cost: '$180', yield: '1800 kg/acre', market_trend: 'Stable' }
                 ];
                 recommendationsList.innerHTML = filteredRecommendations.map(r => `
                     <div class="crop-card p-4 rounded-lg flex flex-col items-center bg-white">
