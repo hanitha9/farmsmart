@@ -159,6 +159,7 @@ def login():
 def recommend():
     try:
         data = request.get_json()
+        logger.info(f"Received data: {data}")
         farmer_id = data['farmer_id']
         location = data['location']
         land_size = float(data['land_size'])
@@ -168,28 +169,33 @@ def recommend():
 
         if soil_option == 'manual':
             soil_type = data['soil_type']
+            logger.info(f"Manual soil type: {soil_type}")
         else:
             r, g, b = data['r'], data['g'], data['b']
             ph, ec = data['ph'], data['ec']
             soil_type = model.predict([[r, g, b, ph, ec]])[0]
+            logger.info(f"Predicted soil type: {soil_type}")
 
         # Get suitable crops
         suitable_crops = soil_crops_df[soil_crops_df['Soil_Type'] == soil_type]['Crop'].tolist()
+        logger.info(f"Suitable crops: {suitable_crops}")
         if not suitable_crops:
+            logger.error("No suitable crops found for this soil type")
             return jsonify({"error": "No suitable crops found for this soil type"}), 400
 
         # Calculate crop characteristics
         recommendations = []
-        for crop in suitable_crops[:3]:  # Top 3 crops
+        for crop in suitable_crops[:3]:
             crop_info = crop_nutrients_df[crop_nutrients_df['Crop'] == crop]
+            logger.info(f"Crop info for {crop}: {crop_info}")
             if crop_info.empty:
+                logger.warning(f"No nutrient data for crop: {crop}")
                 continue
             nutrients = crop_info['Quantity (kg/acre)'].iloc[0]
-            water_requirement = 5500 if crop == 'Paddy' else 3000  # Example values
+            water_requirement = 5500 if crop == 'Paddy' else 3000
             cost = water_requirement * 10
             yield_est = 1000 if crop == 'Paddy' else 2000
-            market_trend = 0.8  # Placeholder
-
+            market_trend = 0.8
             recommendations.append({
                 "crop": crop,
                 "nutrients": nutrients,
@@ -198,20 +204,21 @@ def recommend():
                 "yield": yield_est,
                 "market_trend": market_trend
             })
+        logger.info(f"Recommendations generated: {recommendations}")
 
         if not recommendations:
+            logger.error("No nutrient data found for suitable crops")
             return jsonify({"error": "No nutrient data found for suitable crops"}), 400
 
         # Generate watering schedule
-        schedule = []
         selected_crop = recommendations[0]['crop']
         base_water = recommendations[0]['water_requirement'] * land_size
         soil_adjust = {'Sandy Soil': 1.2, 'Black Cotton Soil - Deep Black Soil': 0.8}.get(soil_type, 1.0)
         total_water = base_water * soil_adjust
-
+        schedule = []
         for i in range(7):
             date = (datetime.datetime.strptime(start_date, '%Y-%m-%d') + 
-                   datetime.timedelta(days=i)).strftime('%Y-%m-%d')
+                    datetime.timedelta(days=i)).strftime('%Y-%m-%d')
             schedule.append({
                 "day": date,
                 "time": "08:00 AM",
@@ -220,19 +227,26 @@ def recommend():
                 "speed": "Slow",
                 "duration": "60 min"
             })
+        logger.info(f"Watering schedule generated: {schedule}")
 
         # Save farm data
-        conn = sqlite3.connect('farm.db')
-        c = conn.cursor()
-        c.execute("""INSERT INTO farm_data (farmer_id, location, land_size, soil_option, 
-                    soil_type, r, g, b, ph, ec, start_date, water_available, selected_crop, created_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                 (farmer_id, location, land_size, soil_option, soil_type,
-                  data.get('r', 0), data.get('g', 0), data.get('b', 0), 
-                  data.get('ph', 0), data.get('ec', 0), start_date, water_available, 
-                  selected_crop, datetime.datetime.now().isoformat()))
-        conn.commit()
-        conn.close()
+        try:
+            conn = sqlite3.connect('farm.db')
+            c = conn.cursor()
+            c.execute("""INSERT INTO farm_data (farmer_id, location, land_size, soil_option, 
+                        soil_type, r, g, b, ph, ec, start_date, water_available, selected_crop, created_at)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                     (farmer_id, location, land_size, soil_option, soil_type,
+                      data.get('r', 0), data.get('g', 0), data.get('b', 0), 
+                      data.get('ph', 0), data.get('ec', 0), start_date, water_available, 
+                      selected_crop, datetime.datetime.now().isoformat()))
+            conn.commit()
+            logger.info("Farm data saved successfully")
+        except Exception as e:
+            logger.error(f"Database save error: {e}")
+            raise
+        finally:
+            conn.close()
 
         return jsonify({
             "recommendations": recommendations,
@@ -283,7 +297,7 @@ def monitor():
 
             moisture = float(soil_response['feeds'][-1]['field4']) if soil_response['feeds'] else 0
             motor_status = int(motor_response['feeds'][-1]['field1']) if motor_response['feeds'] else 0
-            water_supplied = 183.33 * 60 if motor_status else 0  # Example: 183.33 L/min for 60 min
+            water_supplied = 183.33 * 60 if motor_status else 0
 
             moisture_level = ("Low" if moisture < 25 else "Moderate" if moisture < 50 else 
                            "High" if moisture < 75 else "Very High")
