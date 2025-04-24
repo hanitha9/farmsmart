@@ -43,14 +43,14 @@
             transition: color 0.3s;
         }
         .navbar-tabs a:hover {
-            text-decoration: none !important; /* Prevent underline on hover */
+            text-decoration: none !important;
         }
         .navbar-tabs a.active {
-            color: #a7f3d0; /* Matches text-green-200 */
-            font-weight: bold; /* Optional: make active tab bold */
+            color: #a7f3d0;
+            font-weight: bold;
         }
         .navbar-tabs a:focus {
-            outline: 2px solid #a7f3d0; /* Focus outline for accessibility */
+            outline: 2px solid #a7f3d0;
             outline-offset: 2px;
         }
         #crop-details {
@@ -273,6 +273,78 @@
             authSubmit.textContent = isLogin ? 'Register' : 'Login';
         });
 
+        // Tab switching function
+        function switchTab(tabId) {
+            console.log(`Attempting to switch to tab: ${tabId}`);
+            try {
+                // Hide all tab content
+                const tabContent = document.querySelectorAll('#tab-content > div');
+                if (!tabContent.length) throw new Error('No tab content found');
+                tabContent.forEach(div => div.classList.add('hidden'));
+
+                // Remove active state from all tabs
+                const navLinks = document.querySelectorAll('nav a[role="tab"]');
+                if (!navLinks.length) throw new Error('No navigation links found');
+                navLinks.forEach(a => {
+                    a.classList.remove('active');
+                    a.setAttribute('aria-selected', 'false');
+                });
+
+                // Show the selected tab content
+                const targetTab = document.getElementById(tabId);
+                if (!targetTab) throw new Error(`Tab content with id "${tabId}" not found`);
+                targetTab.classList.remove('hidden');
+
+                // Set the active tab
+                const targetTabLink = document.getElementById(`${tabId}-tab`);
+                if (!targetTabLink) throw new Error(`Tab link with id "${tabId}-tab" not found`);
+                targetTabLink.classList.add('active');
+                targetTabLink.setAttribute('aria-selected', 'true');
+                targetTabLink.focus();
+                console.log(`Successfully switched to tab: ${tabId}`);
+            } catch (err) {
+                console.error('Error in switchTab:', err.message);
+            }
+        }
+
+        // Function to attach or reattach tab navigation listeners
+        function setupTabNavigation() {
+            console.log('Setting up tab navigation listeners');
+            const navLinks = document.querySelectorAll('nav a[role="tab"]');
+            if (!navLinks.length) {
+                console.warn('No navigation links with role="tab" found');
+                return;
+            }
+
+            navLinks.forEach(a => {
+                // Remove existing listeners to prevent duplicates
+                a.removeEventListener('click', handleTabClick);
+                a.removeEventListener('keydown', handleTabKeydown);
+
+                // Add new listeners
+                a.addEventListener('click', handleTabClick);
+                a.addEventListener('keydown', handleTabKeydown);
+            });
+        }
+
+        // Click handler for tabs
+        function handleTabClick(e) {
+            e.preventDefault();
+            const tabId = e.currentTarget.id.replace('-tab', '');
+            console.log(`Tab clicked: ${tabId}`);
+            switchTab(tabId);
+        }
+
+        // Keydown handler for accessibility
+        function handleTabKeydown(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                const tabId = e.currentTarget.id.replace('-tab', '');
+                console.log(`Tab activated via keyboard: ${tabId}`);
+                switchTab(tabId);
+            }
+        }
+
         // Handle auth form submission
         document.getElementById('authForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -312,6 +384,8 @@
                     document.getElementById('login').classList.add('hidden');
                     document.getElementById('logoutBtn').classList.remove('hidden');
                     document.querySelectorAll('.navbar-tabs a').forEach(a => a.classList.remove('hidden'));
+                    // Reattach tab navigation listeners after making tabs visible
+                    setupTabNavigation();
                 } else {
                     authTitle.textContent = 'Login';
                     toggleAuth.textContent = 'Register instead';
@@ -407,6 +481,7 @@
 
                 document.getElementById('recommendations-tab').classList.remove('hidden');
                 switchTab('recommendations');
+                setupTabNavigation(); // Reattach listeners after showing new tab
             } catch (err) {
                 farmLoading.classList.add('hidden');
                 farmError.textContent = 'Failed to connect to server: ' + err.message;
@@ -457,6 +532,7 @@
                 }
 
                 switchTab('schedule');
+                setupTabNavigation(); // Reattach listeners after showing new tabs
                 updateProgress();
             }
         });
@@ -589,8 +665,30 @@
             }
         });
 
-        // Update moisture level every 10 minutes (initial call removed)
-        setInterval(updateMoisture, 10 * 60 * 1000); // Every 10 minutes
+        // Define updateMoisture function
+        async function updateMoisture() {
+            if (!farmerId) return;
+            try {
+                const response = await fetch(`/api/thingspeak_moisture?farmer_id=${farmerId}`);
+                const result = await response.json();
+                if (!response.ok) {
+                    console.error('Failed to fetch moisture:', result.error);
+                    return;
+                }
+                const lastValue = result.last_value;
+                const lastUpdated = result.last_updated;
+                document.getElementById('moistureLevel').innerHTML = `
+                    <p class="text-gray-700"><strong>Last Moisture Level:</strong> ${lastValue}%</p>
+                    <p class="text-gray-700"><strong>Last Updated:</strong> ${lastUpdated}</p>
+                `;
+                document.getElementById('lastUpdated').textContent = `Last checked: ${new Date().toLocaleTimeString()}`;
+            } catch (err) {
+                console.error('Error updating moisture:', err.message);
+            }
+        }
+
+        // Update moisture level every 10 minutes
+        setInterval(updateMoisture, 10 * 60 * 1000);
 
         // Check motor status
         document.getElementById('checkMotorStatus').addEventListener('click', async () => {
@@ -654,77 +752,6 @@
             }
         });
 
-        // Tab switching
-        function switchTab(tabId) {
-            try {
-                // Hide all tab content
-                const tabContent = document.querySelectorAll('#tab-content > div');
-                if (!tabContent.length) {
-                    console.error('No tab content found');
-                    return;
-                }
-                tabContent.forEach(div => div.classList.add('hidden'));
-
-                // Remove active state from all tabs
-                const navLinks = document.querySelectorAll('nav a');
-                if (!navLinks.length) {
-                    console.error('No navigation links found');
-                    return;
-                }
-                navLinks.forEach(a => {
-                    a.classList.remove('active');
-                    a.setAttribute('aria-selected', 'false');
-                });
-
-                // Show the selected tab content
-                const targetTab = document.getElementById(tabId);
-                if (!targetTab) {
-                    console.error(`Tab content with id "${tabId}" not found`);
-                    return;
-                }
-                targetTab.classList.remove('hidden');
-
-                // Set the active tab
-                const targetTabLink = document.getElementById(`${tabId}-tab`);
-                if (!targetTabLink) {
-                    console.error(`Tab link with id "${tabId}-tab" not found`);
-                    return;
-                }
-                targetTabLink.classList.add('active');
-                targetTabLink.setAttribute('aria-selected', 'true');
-                targetTabLink.focus(); // Set focus for accessibility
-            } catch (err) {
-                console.error('Error in switchTab:', err);
-            }
-        }
-
-        // Attach event listeners for tab switching
-        function setupTabNavigation() {
-            const navLinks = document.querySelectorAll('nav a[role="tab"]');
-            if (!navLinks.length) {
-                console.error('No navigation links with role="tab" found');
-                return;
-            }
-
-            navLinks.forEach(a => {
-                a.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const tabId = a.id.replace('-tab', '');
-                    console.log(`Switching to tab: ${tabId}`); // Debug
-                    switchTab(tabId);
-                });
-
-                // Add keyboard support for accessibility
-                a.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        const tabId = a.id.replace('-tab', '');
-                        switchTab(tabId);
-                    }
-                });
-            });
-        }
-
         // Logout
         document.getElementById('logoutBtn').addEventListener('click', () => {
             farmerId = null;
@@ -741,6 +768,7 @@
             document.getElementById('nameField').classList.add('hidden');
             document.querySelectorAll('.navbar-tabs a').forEach(a => a.classList.add('hidden'));
             switchTab('login');
+            setupTabNavigation(); // Reattach listeners after hiding tabs
         });
 
         // Update crop progress based on start date
@@ -787,8 +815,6 @@
             const farmForm = document.getElementById('farmForm');
             if (!farmForm) console.error('Farm form not found');
             else console.log('Farm form loaded successfully');
-
-            // Setup tab navigation after DOM is fully loaded
             setupTabNavigation();
         };
     </script>
