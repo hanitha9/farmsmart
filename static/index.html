@@ -105,26 +105,26 @@
                     <div id="sensorSoil" class="hidden">
                         <div class="mb-4">
                             <label class="block text-gray-700">R (0-255)</label>
-                            <input type="number" id="r" class="w-full p-2 border rounded" min="0" max="255" required>
+                            <input type="number" id="r" class="w-full p-2 border rounded" min="0" max="255">
                         </div>
                         <div class="mb-4">
                             <label class="block text-gray-700">G (0-255)</label>
-                            <input type="number" id="g" class="w-full p-2 border rounded" min="0" max="255" required>
+                            <input type="number" id="g" class="w-full p-2 border rounded" min="0" max="255">
                         </div>
                         <div class="mb-4">
                             <label class="block text-gray-700">B (0-255)</label>
-                            <input type="number" id="b" class="w-full p-2 border rounded" min="0" max="255" required>
+                            <input type="number" id="b" class="w-full p-2 border rounded" min="0" max="255">
                         </div>
                         <div class="mb-4">
                             <label class="block text-gray-700">pH (0-14)</label>
-                            <input type="number" id="ph" class="w-full p-2 border rounded" step="0.1" min="0" max="14" required>
+                            <input type="number" id="ph" class="w-full p-2 border rounded" step="0.1" min="0" max="14">
                         </div>
                         <div class="mb-4">
                             <label class="block text-gray-700">EC (mS/cm)</label>
-                            <input type="number" id="ec" class="w-full p-2 border rounded" step="0.01" min="0" required>
+                            <input type="number" id="ec" class="w-full p-2 border rounded" step="0.01" min="0">
                         </div>
                     </div>
-                    <button type="submit" class="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700">Get Recommendations</button>
+                    <button type="submit" id="submitBtn" class="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700">Get Recommendations</button>
                 </form>
                 <div id="farmError" class="text-red-500 mt-4 hidden"></div>
                 <div id="farmLoading" class="text-center mt-4 hidden">Loading...</div>
@@ -160,6 +160,7 @@
         const nameField = document.getElementById('nameField');
         toggleAuth.addEventListener('click', (e) => {
             e.preventDefault();
+            alert('Toggling auth mode');
             const isLogin = authTitle.textContent === 'Login';
             authTitle.textContent = isLogin ? 'Register' : 'Login';
             authSubmit.textContent = isLogin ? 'Register' : 'Login';
@@ -170,6 +171,7 @@
         // Handle auth form submission
         document.getElementById('authForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            alert('Submitting auth form');
             console.log('Auth form submitted');
             const isLogin = authTitle.textContent === 'Login';
             const endpoint = isLogin ? '/api/login' : '/api/register';
@@ -199,12 +201,14 @@
                 if (!response.ok) {
                     authError.textContent = result.error || 'Authentication failed';
                     authError.classList.remove('hidden');
+                    alert('Auth failed: ' + authError.textContent);
                     return;
                 }
 
                 if (isLogin) {
                     farmerId = result.farmer_id;
                     console.log('Logged in, farmerId:', farmerId);
+                    alert('Login successful, farmerId: ' + farmerId);
                     document.getElementById('authSection').classList.add('hidden');
                     document.getElementById('dashboard').classList.remove('hidden');
                     document.getElementById('logoutBtn').classList.remove('hidden');
@@ -214,32 +218,35 @@
                     authError.classList.remove('hidden');
                     authError.classList.remove('text-red-500');
                     authError.classList.add('text-green-500');
+                    alert('Registration successful');
                 }
             } catch (err) {
                 console.error('Auth error:', err);
                 authLoading.classList.add('hidden');
                 authError.textContent = 'Network error occurred';
                 authError.classList.remove('hidden');
+                alert('Auth network error: ' + err.message);
             }
         });
 
         // Toggle soil input method
         function toggleSoilInput() {
             console.log('Toggling soil input');
+            alert('Toggling soil input method');
             const soilOption = document.getElementById('soilOption').value;
             document.getElementById('manualSoil').classList.toggle('hidden', soilOption !== 'manual');
             document.getElementById('sensorSoil').classList.toggle('hidden', soilOption !== 'sensor');
             document.getElementById('soilType').required = soilOption === 'manual';
-            document.getElementById('r').required = soilOption === 'sensor';
-            document.getElementById('g').required = soilOption === 'sensor';
-            document.getElementById('b').required = soilOption === 'sensor';
-            document.getElementById('ph').required = soilOption === 'sensor';
-            document.getElementById('ec').required = soilOption === 'sensor';
+            const sensorInputs = ['r', 'g', 'b', 'ph', 'ec'];
+            sensorInputs.forEach(id => {
+                document.getElementById(id).required = soilOption === 'sensor';
+            });
         }
 
         // Handle farm form submission
         document.getElementById('farmForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            alert('Farm form submitted');
             console.log('Farm form submitted');
             const farmError = document.getElementById('farmError');
             const farmLoading = document.getElementById('farmLoading');
@@ -250,6 +257,7 @@
                 farmError.textContent = 'Please login to submit farm details';
                 farmError.classList.remove('hidden');
                 farmLoading.classList.add('hidden');
+                alert('Error: Please login first');
                 return;
             }
 
@@ -262,54 +270,18 @@
                 water_available: parseFloat(document.getElementById('waterAvailable').value) || 0
             };
 
-            // Input validation
-            if (!data.location.trim()) {
-                farmError.textContent = 'Location is required';
-                farmError.classList.remove('hidden');
-                farmLoading.classList.add('hidden');
-                return;
-            }
-            if (data.land_size <= 0) {
-                farmError.textContent = 'Land size must be positive';
-                farmError.classList.remove('hidden');
-                farmLoading.classList.add('hidden');
-                return;
-            }
-            if (!data.start_date.match(/^\d{4}-\d{2}-\d{2}$/)) {
-                farmError.textContent = 'Invalid start date format (YYYY-MM-DD)';
-                farmError.classList.remove('hidden');
-                farmLoading.classList.add('hidden');
-                return;
-            }
             if (data.soil_option === 'manual') {
                 data.soil_type = document.getElementById('soilType').value;
             } else {
-                data.r = parseInt(document.getElementById('r').value);
-                data.g = parseInt(document.getElementById('g').value);
-                data.b = parseInt(document.getElementById('b').value);
-                data.ph = parseFloat(document.getElementById('ph').value);
-                data.ec = parseFloat(document.getElementById('ec').value);
-                if (data.r < 0 || data.r > 255 || data.g < 0 || data.g > 255 || data.b < 0 || data.b > 255) {
-                    farmError.textContent = 'RGB values must be between 0 and 255';
-                    farmError.classList.remove('hidden');
-                    farmLoading.classList.add('hidden');
-                    return;
-                }
-                if (data.ph < 0 || data.ph > 14) {
-                    farmError.textContent = 'pH must be between 0 and 14';
-                    farmError.classList.remove('hidden');
-                    farmLoading.classList.add('hidden');
-                    return;
-                }
-                if (data.ec < 0) {
-                    farmError.textContent = 'EC must be non-negative';
-                    farmError.classList.remove('hidden');
-                    farmLoading.classList.add('hidden');
-                    return;
-                }
+                data.r = parseInt(document.getElementById('r').value) || 0;
+                data.g = parseInt(document.getElementById('g').value) || 0;
+                data.b = parseInt(document.getElementById('b').value) || 0;
+                data.ph = parseFloat(document.getElementById('ph').value) || 0;
+                data.ec = parseFloat(document.getElementById('ec').value) || 0;
             }
 
             console.log('Sending data to /api/recommend:', data);
+            alert('Sending request to server');
             try {
                 const response = await fetch('/api/recommend', {
                     method: 'POST',
@@ -317,6 +289,7 @@
                     body: JSON.stringify(data)
                 });
                 console.log('Recommend response status:', response.status);
+                alert('Received response with status: ' + response.status);
                 const result = await response.json();
                 console.log('Recommend response data:', result);
                 farmLoading.classList.add('hidden');
@@ -324,6 +297,7 @@
                 if (!response.ok) {
                     farmError.textContent = result.error || 'Failed to get recommendations';
                     farmError.classList.remove('hidden');
+                    alert('Error from server: ' + farmError.textContent);
                     return;
                 }
 
@@ -376,13 +350,15 @@
                     </table>
                 `;
                 document.getElementById('scheduleSection').classList.remove('hidden');
+                alert('Recommendations displayed successfully');
 
                 loadMonitoring();
             } catch (err) {
                 console.error('Recommend error:', err);
                 farmLoading.classList.add('hidden');
-                farmError.textContent = 'Failed to connect to server. Please try again.';
+                farmError.textContent = 'Failed to connect to server: ' + err.message;
                 farmError.classList.remove('hidden');
+                alert('Network error: ' + err.message);
             }
         });
 
@@ -390,6 +366,7 @@
         async function loadMonitoring() {
             if (!farmerId) return;
             console.log('Loading monitoring data for farmerId:', farmerId);
+            alert('Loading monitoring data');
             const monitoringError = document.getElementById('monitoringError');
             const monitoringLoading = document.getElementById('monitoringLoading');
             monitoringError.classList.add('hidden');
@@ -404,6 +381,7 @@
                 if (!response.ok) {
                     monitoringError.textContent = result.error || 'Failed to fetch monitoring data';
                     monitoringError.classList.remove('hidden');
+                    alert('Monitoring error: ' + monitoringError.textContent);
                     return;
                 }
 
@@ -416,11 +394,13 @@
                     <p><strong>Progress:</strong> ${result.progress}%</p>
                 `;
                 document.getElementById('monitoringSection').classList.remove('hidden');
+                alert('Monitoring data loaded');
             } catch (err) {
                 console.error('Monitoring error:', err);
                 monitoringLoading.classList.add('hidden');
                 monitoringError.textContent = 'Network error occurred';
                 monitoringError.classList.remove('hidden');
+                alert('Monitoring network error: ' + err.message);
             }
         }
 
@@ -430,6 +410,7 @@
         // Logout
         document.getElementById('logoutBtn').addEventListener('click', () => {
             console.log('Logging out');
+            alert('Logging out');
             farmerId = null;
             document.getElementById('dashboard').classList.add('hidden');
             document.getElementById('authSection').classList.remove('hidden');
@@ -440,6 +421,17 @@
             toggleAuth.textContent = 'Register instead';
             nameField.classList.add('hidden');
         });
+
+        // Debug: Check if form exists
+        window.onload = () => {
+            const farmForm = document.getElementById('farmForm');
+            if (!farmForm) {
+                alert('Error: Farm form not found');
+                console.error('Farm form not found');
+            } else {
+                console.log('Farm form loaded successfully');
+            }
+        };
     </script>
 </body>
 </html>
