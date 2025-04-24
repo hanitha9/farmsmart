@@ -1,0 +1,100 @@
+pH,Soil Acidity/Alkalinity,EC,Nutrient Level,Key Nutrient Insights
+4.644352436122464,Strongly Acidic,0.20108075162246175,Very Low,Poor nutrient availability especially phosphorus
+4.145972000608287,Strongly Acidic,0.2188840546247635,Very Low,Poor nutrient availability especially phosphorus
+4.721579464978655,Strongly Acidic,0.11892591877349049,Very Low,Poor nutrient availability especially phosphorus
+4.183141641531763,Strongly Acidic,0.1103592717210281,Very Low,Poor nutrient availability especially phosphorus
+4.270097323227104,Strongly Acidic,0.10495357791054674,Very Low,Poor nutrient availability especially phosphorus
+4.584672410350221,Strongly Acidic,0.13698045016174717,Very Low,Poor nutrient availability especially phosphorus
+4.657153959427516,Strongly Acidic,0.1889642480250749,Very Low,Poor nutrient availability especially phosphorus
+4.157615781755472,Strongly Acidic,0.24534277194746287,Very Low,Poor nutrient availability especially phosphorus
+4.10828668274092,Strongly Acidic,0.2111107647652239,Very Low,Poor nutrient availability especially phosphorus
+4.005916751212668,Strongly Acidic,0.19646312990563114,Very Low,Poor nutrient availability especially phosphorus
+4.856987785049133,Strongly Acidic,0.21237398029581606,Very Low,Poor nutrient availability especially phosphorus
+5.449428484768258,Acidic,0.39217779355575483,Low,Nitrogen and calcium deficiency common
+5.239558158673489,Acidic,0.29463827690770383,Low,Nitrogen and calcium deficiency common
+5.17980046880837,Acidic,0.38043541972767675,Low,Nitrogen and calcium deficiency common
+5.288917828931668,Acidic,0.25089291200378505,Low,Nitrogen and calcium deficiency common
+5.394390219871511,Acidic,0.2711642611033483,Low,Nitrogen and calcium deficiency common
+5.290706659419961,Acidic,0.2165931605018975,Low,Nitrogen and calcium deficiency common
+5.329355481807036,Acidic,0.21492610659802058,Low,Nitrogen and calcium deficiency common
+5.4771482946802905,Acidic,0.3050037960374758,Low,Nitrogen and calcium deficiency common
+5.40560582142504,Acidic,0.25847487323811913,Low,Nitrogen and calcium deficiency common
+5.343966470287246,Acidic,0.20143846325393455,Low,Nitrogen and calcium deficiency common
+5.171796326116898,Acidic,0.39917894077864685,Low,Nitrogen and calcium deficiency common
+5.718531797221827,Slightly Acidic,0.5722330974589649,Moderate,Phosphorus uptake improves nitrogen still limited
+5.831468597460868,Slightly Acidic,0.44770372968811945,Moderate,Phosphorus uptake improves nitrogen still limited
+5.882565830076489,Slightly Acidic,0.5051461747318555,Moderate,Phosphorus uptake improves nitrogen still limited
+5.8163677586312,Slightly Acidic,0.46340331144581987,Moderate,Phosphorus uptake improves nitrogen still limited
+5.767363104406242,Slightly Acidic,0.5857107631729606,Moderate,Phosphorus uptake improves nitrogen still limited
+5.698963423032458,Slightly Acidic,0.3307106791879044,Moderate,Phosphorus uptake improves nitrogen still limited
+5.838678675987782,Slightly Acidic,0.38536305734814813,Moderate,Phosphorus uptake improves nitrogen still limited
+5.624499961934038,Slightly Acidic,0.5184286716198865,Moderate,Phosphorus uptake improves nitrogen still limited
+5.856881685469321,Slightly Acidic,0.4574178088324754,Moderate,Phosphorus uptake improves nitrogen still limited
+5.713925239038786,Slightly Acidic,0.510433656819626,Moderate,Phosphorus uptake improves nitrogen still limited
+5.856051421734178,Slightly Acidic,0.5598512818689825,Moderate,Phosphorus uptake improves nitrogen still limited
+6.380729078119378,Ideal (Slightly Acidic),0.7454322579791095,High (Optimal),Best range for nutrient availability
+6.195475948978777,Ideal (Slightly Acidic),0.7373664247041497,High (Optimal),Best range for nutrient availability
+6.447910261741949,Ideal (Slightly Acidic),0.6581830833848004,High (Optimal),Best range for nutrient availability
+6.38640705688627,Ideal (Slightly Acidic),0.5588814280581136,High (Optimal),Best range for nutrient availability
+6.301932270483758,Ideal (Slightly Acidic),0.7508286559090245,High (Optimal),Best range for nutrient availability
+6.173794580678427,Ideal (Slightly Acidic),0.6937311871986499,High (Optimal),Best range for nutrient availability
+6.362030389730996,Ideal (Slightly Acidic),0.7916612845993045,High (Optimal),Best range for nutrient availability
+6.3108211850075095,Ideal (Slightly Acidic),0.5528260445009003,High (Optimal),Best range for nutrient availability
+6.420300036835988,Ideal (Slightly Acidic),0.7973318383671241,High (Optimal),Best range for nutrient availability
+6.194517490915689,Ideal (Slightly Acidic),0.7835533236719321,High (Optimal),Best range for nutrient availability
+6.286157980536234,Ideal (Slightly Acidic),0.7189073147371833,High (Optimal),Best range for nutrient availability
+6.959642836678781,Neutral,1.1777005671968896,Very High (Optimal),Ideal for most crops balanced nutrient absorption
+6.616462999110323,Neutral,1.0276088557173333,Very High (Optimal),Ideal for most crops balanced nutrient absorption
+6.848644509058852,Neutral,0.6881024185990527,Very High (Optimal),Ideal for most crops balanced nutrient absorption
+6.814068047525535,Neutral,1.0387459098758656,Very High (Optimal),Ideal for most crops balanced nutrient absorption
+6.9221328407763245,Neutral,0.8717600256219624,Very High (Optimal),Ideal for most crops balanced nutrient absorption
+6.918812382625946,Neutral,0.8171120283204134,Very High (Optimal),Ideal for most crops balanced nutrient absorption
+6.7269119473242425,Neutral,0.7285754639631123,Very High (Optimal),Ideal for most crops balanced nutrient absorption
+6.738049440587889,Neutral,1.1887937976487652,Very High (Optimal),Ideal for most crops balanced nutrient absorption
+6.974282222392896,Neutral,1.1114000556203996,Very High (Optimal),Ideal for most crops balanced nutrient absorption
+6.946813886823256,Neutral,1.1060524403398837,Very High (Optimal),Ideal for most crops balanced nutrient absorption
+6.985614258445503,Neutral,0.8193587971166263,Very High (Optimal),Ideal for most crops balanced nutrient absorption
+7.180140477984863,Slightly Alkaline,1.4004392603654912,Moderate to High,Calcium and magnesium uptake increases
+7.253633296025678,Slightly Alkaline,1.0912058948863543,Moderate to High,Calcium and magnesium uptake increases
+7.342421715486365,Slightly Alkaline,0.854243051499976,Moderate to High,Calcium and magnesium uptake increases
+7.466076670776227,Slightly Alkaline,1.43169944455226,Moderate to High,Calcium and magnesium uptake increases
+7.447295356924033,Slightly Alkaline,1.2511212622683794,Moderate to High,Calcium and magnesium uptake increases
+7.2396375699642395,Slightly Alkaline,1.0355068570333086,Moderate to High,Calcium and magnesium uptake increases
+7.337804979833528,Slightly Alkaline,1.216309148948992,Moderate to High,Calcium and magnesium uptake increases
+7.104107460761031,Slightly Alkaline,1.264745308492345,Moderate to High,Calcium and magnesium uptake increases
+7.396646257968289,Slightly Alkaline,1.2576190985626003,Moderate to High,Calcium and magnesium uptake increases
+7.352163279826948,Slightly Alkaline,1.2832519923139971,Moderate to High,Calcium and magnesium uptake increases
+7.1668186415927675,Slightly Alkaline,0.911528308881346,Moderate to High,Calcium and magnesium uptake increases
+7.606991017613562,Alkaline,1.8939321114805714,Moderate,Iron and zinc become less available
+7.896283971169209,Alkaline,1.5611148792498737,Moderate,Iron and zinc become less available
+7.948059704192099,Alkaline,1.0170224715405152,Moderate,Iron and zinc become less available
+7.7494173239926845,Alkaline,1.2723006249899624,Moderate,Iron and zinc become less available
+7.705850176350284,Alkaline,1.4367533174284508,Moderate,Iron and zinc become less available
+7.7749530648902105,Alkaline,1.5594940272308015,Moderate,Iron and zinc become less available
+7.7786050051376465,Alkaline,1.2187899261940447,Moderate,Iron and zinc become less available
+7.882768693945763,Alkaline,1.256802687226619,Moderate,Iron and zinc become less available
+7.939063452586244,Alkaline,1.5779950694429297,Moderate,Iron and zinc become less available
+7.696838235433291,Alkaline,1.6743615001316974,Moderate,Iron and zinc become less available
+7.811556872412751,Alkaline,1.166207216126499,Moderate,Iron and zinc become less available
+8.246562531520338,Strongly Alkaline,2.257872366171657,Low,Poor availability of micronutrients
+8.110626924573603,Strongly Alkaline,2.4050229258093165,Low,Poor availability of micronutrients
+8.267496155160456,Strongly Alkaline,2.2284834304643684,Low,Poor availability of micronutrients
+8.104924470932735,Strongly Alkaline,2.281661824210753,Low,Poor availability of micronutrients
+8.113870089637782,Strongly Alkaline,1.5786941555936145,Low,Poor availability of micronutrients
+8.12823311424502,Strongly Alkaline,1.7006315140805115,Low,Poor availability of micronutrients
+8.49813754097074,Strongly Alkaline,2.1283371431204237,Low,Poor availability of micronutrients
+8.109638249813099,Strongly Alkaline,1.6136343617475348,Low,Poor availability of micronutrients
+8.271191211552274,Strongly Alkaline,2.424521019565058,Low,Poor availability of micronutrients
+8.170535455793308,Strongly Alkaline,1.5944917254550677,Low,Poor availability of micronutrients
+8.356493147102075,Strongly Alkaline,1.7148295781155958,Low,Poor availability of micronutrients
+8.86129634453528,Very Strongly Alkaline,2.4545577750264114,Very Low,Excess sodium buildup affects root health
+8.899474018366368,Very Strongly Alkaline,2.5324593333625116,Very Low,Excess sodium buildup affects root health
+8.70831183129561,Very Strongly Alkaline,2.9565473779254785,Very Low,Excess sodium buildup affects root health
+8.72783970133541,Very Strongly Alkaline,2.7200733032394435,Very Low,Excess sodium buildup affects root health
+8.679264109709127,Very Strongly Alkaline,2.674926111079692,Very Low,Excess sodium buildup affects root health
+8.726552196634072,Very Strongly Alkaline,2.9991522038248615,Very Low,Excess sodium buildup affects root health
+8.730728739587786,Very Strongly Alkaline,2.195835647590242,Very Low,Excess sodium buildup affects root health
+8.732131359351067,Very Strongly Alkaline,2.1077208416267945,Very Low,Excess sodium buildup affects root health
+8.956235510107474,Very Strongly Alkaline,2.2403842895884756,Very Low,Excess sodium buildup affects root health
+8.842319102794749,Very Strongly Alkaline,2.395765929594408,Very Low,Excess sodium buildup affects root health
+8.625075558357535,Very Strongly Alkaline,2.332827523458243,Very Low,Excess sodium buildup affects root health
