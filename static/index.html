@@ -568,7 +568,7 @@
                 document.getElementById('moisture-tab').classList.remove('hidden');
                 document.getElementById('crop-details-tab').classList.remove('hidden');
 
-                // Fetch crop details
+                // Fetch crop details with fallback
                 fetch(`/api/crop_details?crop=${selectedCrop}`)
                     .then(response => {
                         if (!response.ok) throw new Error('Failed to fetch crop details');
@@ -579,27 +579,48 @@
                         document.getElementById('cropDetails').innerHTML = `
                             <div class="p-4 rounded-lg bg-black bg-opacity-50">
                                 <h4 class="font-bold text-lg">Scientific Name</h4>
-                                <p>${result.details["Scientific Name"] || 'N/A'}</p>
+                                <p>${result.details["Scientific Name"] || 'Not available'}</p>
                                 <h4 class="font-bold text-lg mt-4">Growth Conditions</h4>
-                                <p>${result.details["Growth Conditions"] || 'N/A'}</p>
+                                <p>${result.details["Growth Conditions"] || 'Not available'}</p>
                                 <h4 class="font-bold text-lg mt-4">Soil Requirements</h4>
-                                <p>${result.details["Soil Requirements"] || 'N/A'}</p>
+                                <p>${result.details["Soil Requirements"] || 'Not available'}</p>
                                 <h4 class="font-bold text-lg mt-4">Water Needs</h4>
-                                <p>${result.details["Water Needs"] || 'N/A'}</p>
+                                <p>${result.details["Water Needs"] || 'Not available'}</p>
                                 <h4 class="font-bold text-lg mt-4">Care Tips</h4>
-                                <p>${result.details["Care Tips"] || 'N/A'}</p>
+                                <p>${result.details["Care Tips"] || 'Not available'}</p>
                                 <h4 class="font-bold text-lg mt-4">Pests and Diseases</h4>
-                                <p>${result.details["Pests and Diseases"] || 'N/A'}</p>
+                                <p>${result.details["Pests and Diseases"] || 'Not available'}</p>
                                 <h4 class="font-bold text-lg mt-4">Harvest Time</h4>
-                                <p>${result.details["Harvest Time"] || 'N/A'}</p>
+                                <p>${result.details["Harvest Time"] || 'Not available'}</p>
                                 <h4 class="font-bold text-lg mt-4">Yield Potential</h4>
-                                <p>${result.details["Yield Potential"] || 'N/A'}</p>
+                                <p>${result.details["Yield Potential"] || 'Not available'}</p>
                             </div>
                         `;
                     })
                     .catch(err => {
                         console.error('Error fetching crop details:', err);
-                        document.getElementById('cropDetails').innerHTML = `<p class="text-red-500">Network error: ${err.message}</p>`;
+                        document.getElementById('crop-details').style.backgroundImage = `url('https://via.placeholder.com/400')`;
+                        document.getElementById('cropDetails').innerHTML = `
+                            <div class="p-4 rounded-lg bg-black bg-opacity-50">
+                                <p class="text-red-500">Failed to load crop details. Using default data.</p>
+                                <h4 class="font-bold text-lg">Scientific Name</h4>
+                                <p>Not available</p>
+                                <h4 class="font-bold text-lg mt-4">Growth Conditions</h4>
+                                <p>Not available</p>
+                                <h4 class="font-bold text-lg mt-4">Soil Requirements</h4>
+                                <p>Not available</p>
+                                <h4 class="font-bold text-lg mt-4">Water Needs</h4>
+                                <p>Not available</p>
+                                <h4 class="font-bold text-lg mt-4">Care Tips</h4>
+                                <p>Not available</p>
+                                <h4 class="font-bold text-lg mt-4">Pests and Diseases</h4>
+                                <p>Not available</p>
+                                <h4 class="font-bold text-lg mt-4">Harvest Time</h4>
+                                <p>Not available</p>
+                                <h4 class="font-bold text-lg mt-4">Yield Potential</h4>
+                                <p>Not available</p>
+                            </div>
+                        `;
                     });
 
                 switchTab('schedule');
@@ -722,7 +743,7 @@
                 const result = await response.json();
                 if (!response.ok || !result.last_value) {
                     document.getElementById('moistureLevel').innerHTML = `
-                        <p class="text-gray-700"><strong>Last Moisture Level:</strong> N/A (Data not found)</p>
+                        <p class="text-gray-700"><strong>Last Moisture Level:</strong> 50% (Default value, no data available)</p>
                         <p class="text-gray-700"><strong>Last Updated:</strong> N/A</p>
                     `;
                 } else {
@@ -749,7 +770,7 @@
                 const result = await response.json();
                 if (!response.ok || !result.last_value) {
                     document.getElementById('moistureLevel').innerHTML = `
-                        <p class="text-gray-700"><strong>Last Moisture Level:</strong> N/A (Data not found)</p>
+                        <p class="text-gray-700"><strong>Last Moisture Level:</strong> 50% (Default value, no data available)</p>
                         <p class="text-gray-700"><strong>Last Updated:</strong> N/A</p>
                     `;
                 } else {
