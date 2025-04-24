@@ -60,6 +60,12 @@
             color: white;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
         }
+        .stage-image {
+            max-width: 300px;
+            height: auto;
+            margin-top: 10px;
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body class="min-h-screen">
@@ -231,7 +237,58 @@
             <!-- Organic Pesticides -->
             <div class="hidden p-6 bg-white rounded-lg shadow-md" id="pesticides" role="tabpanel" aria-labelledby="pesticides-tab">
                 <h3 class="text-xl font-bold mb-4 text-green-800">Organic Pesticides</h3>
-                <div id="pesticidesInfo" class="text-gray-700"></div>
+                <div id="pesticidesInfo" class="text-gray-700 space-y-6">
+                    <div>
+                        <h4 class="font-bold">1. Neem Oil Spray</h4>
+                        <p><strong>Proportions:</strong> 1 liter water, 5 ml neem oil, 1 ml liquid soap (as emulsifier)</p>
+                        <p><strong>Process:</strong> Mix neem oil with liquid soap in a small bowl to emulsify. Slowly add this mixture to 1 liter of water while stirring continuously. Pour into a spray bottle and shake well before use. Apply to affected plants every 7-10 days.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold">2. Garlic Spray</h4>
+                        <p><strong>Proportions:</strong> 10 garlic cloves, 1 liter water, 1 tsp mineral oil</p>
+                        <p><strong>Process:</strong> Crush garlic cloves and soak in 1 liter of water for 24 hours. Strain the liquid, add mineral oil, and mix well. Pour into a spray bottle and apply to plants, focusing on pest-infested areas, every 5 days.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold">3. Chili Pepper Spray</h4>
+                        <p><strong>Proportions:</strong> 10-15 hot chili peppers, 1 liter water, 1 tsp soap</p>
+                        <p><strong>Process:</strong> Blend chili peppers with water, strain to remove solids, and add soap to enhance adhesion. Pour into a spray bottle and apply to leaves, avoiding overuse to prevent plant damage, every 4-6 days.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold">4. Tomato Leaf Spray</h4>
+                        <p><strong>Proportions:</strong> 2 cups chopped tomato leaves, 1 liter water</p>
+                        <p><strong>Process:</strong> Boil tomato leaves in water for 30 minutes, then cool and strain. Dilute with an equal amount of water and spray on plants affected by soft-bodied insects every week.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold">5. Soap Spray</h4>
+                        <p><strong>Proportions:</strong> 1 tbsp liquid soap, 1 liter water</p>
+                        <p><strong>Process:</strong> Mix soap with water until fully dissolved. Pour into a spray bottle and apply to aphids or mites on plants, rinsing after 24 hours to avoid residue, every 5 days.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold">6. Vinegar Spray</h4>
+                        <p><strong>Proportions:</strong> 1 cup vinegar, 1 liter water</p>
+                        <p><strong>Process:</strong> Combine vinegar and water, then pour into a spray bottle. Use on weeds or fungal growth, applying sparingly to avoid plant damage, every 10 days.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold">7. Diatomaceous Earth</h4>
+                        <p><strong>Proportions:</strong> 100g food-grade diatomaceous earth, 1 liter water (for slurry)</p>
+                        <p><strong>Process:</strong> Mix diatomaceous earth with water to create a slurry, then sprinkle or spray on soil around plants to deter crawling insects. Reapply after rain, every 7-10 days.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold">8. Mint Spray</h4>
+                        <p><strong>Proportions:</strong> 1 cup fresh mint leaves, 1 liter water</p>
+                        <p><strong>Process:</strong> Boil mint leaves in water for 20 minutes, cool, and strain. Dilute with equal water and spray on plants to repel ants and aphids, every 6 days.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold">9. Citrus Peel Spray</h4>
+                        <p><strong>Proportions:</strong> Peels of 3 citrus fruits, 1 liter water</p>
+                        <p><strong>Process:</strong> Soak peels in water for 48 hours, strain, and pour into a spray bottle. Apply to plants to deter pests like whiteflies, every 8 days.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold">10. Tobacco Spray</h4>
+                        <p><strong>Proportions:</strong> 1 cup tobacco leaves, 1 liter water</p>
+                        <p><strong>Process:</strong> Soak tobacco leaves in water for 24 hours, strain, and dilute with equal water. Use sparingly on hardy plants to kill soft-bodied pests, every 10 days, with caution due to toxicity.</p>
+                    </div>
+                </div>
             </div>
 
             <!-- Crop Progress -->
@@ -239,6 +296,8 @@
                 <h3 class="text-xl font-bold mb-4 text-green-800">Crop Progress</h3>
                 <div id="progressBar" class="mb-4"></div>
                 <div id="currentStage" class="mb-4 text-gray-700"></div>
+                <div id="stageDetails" class="text-gray-700 space-y-4"></div>
+                <img id="stageImage" class="stage-image hidden" alt="Stage Image">
                 <select id="updateStage" class="p-2 border rounded-lg mb-4">
                     <option value="Preparation of soil">Preparation of soil</option>
                     <option value="Sowing">Sowing</option>
@@ -277,12 +336,10 @@
         function switchTab(tabId) {
             console.log(`Attempting to switch to tab: ${tabId}`);
             try {
-                // Hide all tab content
                 const tabContent = document.querySelectorAll('#tab-content > div');
                 if (!tabContent.length) throw new Error('No tab content found');
                 tabContent.forEach(div => div.classList.add('hidden'));
 
-                // Remove active state from all tabs
                 const navLinks = document.querySelectorAll('nav a[role="tab"]');
                 if (!navLinks.length) throw new Error('No navigation links found');
                 navLinks.forEach(a => {
@@ -290,12 +347,10 @@
                     a.setAttribute('aria-selected', 'false');
                 });
 
-                // Show the selected tab content
                 const targetTab = document.getElementById(tabId);
                 if (!targetTab) throw new Error(`Tab content with id "${tabId}" not found`);
                 targetTab.classList.remove('hidden');
 
-                // Set the active tab
                 const targetTabLink = document.getElementById(`${tabId}-tab`);
                 if (!targetTabLink) throw new Error(`Tab link with id "${tabId}-tab" not found`);
                 targetTabLink.classList.add('active');
@@ -307,7 +362,6 @@
             }
         }
 
-        // Function to attach or reattach tab navigation listeners
         function setupTabNavigation() {
             console.log('Setting up tab navigation listeners');
             const navLinks = document.querySelectorAll('nav a[role="tab"]');
@@ -317,17 +371,14 @@
             }
 
             navLinks.forEach(a => {
-                // Remove existing listeners to prevent duplicates
                 a.removeEventListener('click', handleTabClick);
                 a.removeEventListener('keydown', handleTabKeydown);
 
-                // Add new listeners
                 a.addEventListener('click', handleTabClick);
                 a.addEventListener('keydown', handleTabKeydown);
             });
         }
 
-        // Click handler for tabs
         function handleTabClick(e) {
             e.preventDefault();
             const tabId = e.currentTarget.id.replace('-tab', '');
@@ -335,7 +386,6 @@
             switchTab(tabId);
         }
 
-        // Keydown handler for accessibility
         function handleTabKeydown(e) {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
@@ -384,7 +434,6 @@
                     document.getElementById('login').classList.add('hidden');
                     document.getElementById('logoutBtn').classList.remove('hidden');
                     document.querySelectorAll('.navbar-tabs a').forEach(a => a.classList.remove('hidden'));
-                    // Reattach tab navigation listeners after making tabs visible
                     setupTabNavigation();
                 } else {
                     authTitle.textContent = 'Login';
@@ -466,7 +515,16 @@
                 soilType = result.soil_type;
                 document.getElementById('soilType').textContent = `Soil Type: ${soilType}`;
                 const recommendationsList = document.getElementById('recommendationsList');
-                recommendationsList.innerHTML = result.recommendations.map(r => `
+                // Filter out wheat and include vegetables like brinjal
+                const filteredRecommendations = result.recommendations.filter(r => r.crop !== 'wheat').map(r => ({
+                    ...r,
+                    crop: r.crop === 'wheat' ? 'brinjal' : r.crop // Replace wheat with brinjal as a fallback
+                })).concat([
+                    { crop: 'brinjal', image_url: 'https://via.placeholder.com/100?text=Brinjal', nutrients: '50 kg/acre', water_requirement: '300 L/acre', cost: '$200', yield: '2000 kg/acre', market_trend: 'Stable' },
+                    { crop: 'tomato', image_url: 'https://via.placeholder.com/100?text=Tomato', nutrients: '60 kg/acre', water_requirement: '400 L/acre', cost: '$250', yield: '2500 kg/acre', market_trend: 'Rising' },
+                    { crop: 'okra', image_url: 'https://via.placeholder.com/100?text=Okra', nutrients: '45 kg/acre', water_requirement: '350 L/acre', cost: '$180', yield: '1800 kg/acre', market_trend: 'Stable' }
+                ]);
+                recommendationsList.innerHTML = filteredRecommendations.map(r => `
                     <div class="crop-card p-4 rounded-lg flex flex-col items-center bg-white">
                         <img src="${r.image_url}" alt="${r.crop}" class="crop-image mb-2" onerror="this.src='https://via.placeholder.com/100';">
                         <h4 class="font-bold text-lg text-green-800">${r.crop}</h4>
@@ -481,7 +539,7 @@
 
                 document.getElementById('recommendations-tab').classList.remove('hidden');
                 switchTab('recommendations');
-                setupTabNavigation(); // Reattach listeners after showing new tab
+                setupTabNavigation();
             } catch (err) {
                 farmLoading.classList.add('hidden');
                 farmError.textContent = 'Failed to connect to server: ' + err.message;
@@ -497,7 +555,6 @@
                 document.getElementById('moisture-tab').classList.remove('hidden');
                 document.getElementById('crop-details-tab').classList.remove('hidden');
 
-                // Fetch crop details and set background
                 try {
                     const response = await fetch(`/api/crop_details?crop=${selectedCrop}`);
                     const result = await response.json();
@@ -532,7 +589,7 @@
                 }
 
                 switchTab('schedule');
-                setupTabNavigation(); // Reattach listeners after showing new tabs
+                setupTabNavigation();
                 updateProgress();
             }
         });
@@ -649,19 +706,24 @@
             try {
                 const response = await fetch(`/api/thingspeak_moisture?farmer_id=${farmerId}`);
                 const result = await response.json();
-                if (!response.ok) {
-                    document.getElementById('moistureLevel').innerHTML = `<p class="text-red-500">Failed to fetch moisture: ${result.error}</p>`;
-                    return;
+                if (!response.ok || !result.last_value) {
+                    document.getElementById('moistureLevel').innerHTML = `
+                        <p class="text-gray-700"><strong>Last Moisture Level:</strong> N/A (Data not found)</p>
+                        <p class="text-gray-700"><strong>Last Updated:</strong> N/A</p>
+                    `;
+                } else {
+                    const lastValue = result.last_value;
+                    const lastUpdated = result.last_updated;
+                    document.getElementById('moistureLevel').innerHTML = `
+                        <p class="text-gray-700"><strong>Last Moisture Level:</strong> ${lastValue}%</p>
+                        <p class="text-gray-700"><strong>Last Updated:</strong> ${lastUpdated}</p>
+                    `;
                 }
-                const lastValue = result.last_value;
-                const lastUpdated = result.last_updated;
-                document.getElementById('moistureLevel').innerHTML = `
-                    <p class="text-gray-700"><strong>Last Moisture Level:</strong> ${lastValue}%</p>
-                    <p class="text-gray-700"><strong>Last Updated:</strong> ${lastUpdated}</p>
-                `;
                 document.getElementById('lastUpdated').textContent = `Last checked: ${new Date().toLocaleTimeString()}`;
             } catch (err) {
-                document.getElementById('moistureLevel').innerHTML = `<p class="text-red-500">Network error: ${err.message}</p>`;
+                document.getElementById('moistureLevel').innerHTML = `
+                    <p class="text-red-500">Network error: ${err.message}</p>
+                `;
             }
         });
 
@@ -671,23 +733,25 @@
             try {
                 const response = await fetch(`/api/thingspeak_moisture?farmer_id=${farmerId}`);
                 const result = await response.json();
-                if (!response.ok) {
-                    console.error('Failed to fetch moisture:', result.error);
-                    return;
+                if (!response.ok || !result.last_value) {
+                    document.getElementById('moistureLevel').innerHTML = `
+                        <p class="text-gray-700"><strong>Last Moisture Level:</strong> N/A (Data not found)</p>
+                        <p class="text-gray-700"><strong>Last Updated:</strong> N/A</p>
+                    `;
+                } else {
+                    const lastValue = result.last_value;
+                    const lastUpdated = result.last_updated;
+                    document.getElementById('moistureLevel').innerHTML = `
+                        <p class="text-gray-700"><strong>Last Moisture Level:</strong> ${lastValue}%</p>
+                        <p class="text-gray-700"><strong>Last Updated:</strong> ${lastUpdated}</p>
+                    `;
                 }
-                const lastValue = result.last_value;
-                const lastUpdated = result.last_updated;
-                document.getElementById('moistureLevel').innerHTML = `
-                    <p class="text-gray-700"><strong>Last Moisture Level:</strong> ${lastValue}%</p>
-                    <p class="text-gray-700"><strong>Last Updated:</strong> ${lastUpdated}</p>
-                `;
                 document.getElementById('lastUpdated').textContent = `Last checked: ${new Date().toLocaleTimeString()}`;
             } catch (err) {
                 console.error('Error updating moisture:', err.message);
             }
         }
 
-        // Update moisture level every 10 minutes
         setInterval(updateMoisture, 10 * 60 * 1000);
 
         // Check motor status
@@ -696,16 +760,19 @@
             try {
                 const response = await fetch(`/api/monitor?farmer_id=${farmerId}`);
                 const result = await response.json();
-                if (!response.ok) {
-                    alert('Failed to fetch monitoring data: ' + result.error);
-                    return;
+                if (!response.ok || !result.moisture) {
+                    document.getElementById('motorStatus').innerHTML = `
+                        <p class="text-gray-700"><strong>Moisture Level:</strong> N/A (Data not found)</p>
+                        <p class="text-gray-700"><strong>Motor Status:</strong> N/A</p>
+                        <p class="text-gray-700"><strong>Water Supplied:</strong> N/A L</p>
+                    `;
+                } else {
+                    document.getElementById('motorStatus').innerHTML = `
+                        <p class="text-gray-700"><strong>Moisture Level:</strong> ${result.moisture}</p>
+                        <p class="text-gray-700"><strong>Motor Status:</strong> ${result.motor_status}</p>
+                        <p class="text-gray-700"><strong>Water Supplied:</strong> ${result.water_supplied} L</p>
+                    `;
                 }
-
-                document.getElementById('motorStatus').innerHTML = `
-                    <p class="text-gray-700"><strong>Moisture Level:</strong> ${result.moisture}</p>
-                    <p class="text-gray-700"><strong>Motor Status:</strong> ${result.motor_status}</p>
-                    <p class="text-gray-700"><strong>Water Supplied:</strong> ${result.water_supplied} L</p>
-                `;
 
                 document.getElementById('notificationsList').innerHTML = result.notifications.map(n => `
                     <div class="p-4 mb-2 rounded-lg ${n.type === 'warning' ? 'bg-yellow-100' : 'bg-blue-100'}">
@@ -746,7 +813,7 @@
                     </div>
                 `;
                 document.getElementById('currentStage').textContent = `Current Stage: ${result.stage}`;
-                alert('Crop stage updated successfully');
+                updateProgress();
             } catch (err) {
                 alert('Failed to update stage: ' + err.message);
             }
@@ -768,7 +835,7 @@
             document.getElementById('nameField').classList.add('hidden');
             document.querySelectorAll('.navbar-tabs a').forEach(a => a.classList.add('hidden'));
             switchTab('login');
-            setupTabNavigation(); // Reattach listeners after hiding tabs
+            setupTabNavigation();
         });
 
         // Update crop progress based on start date
@@ -777,29 +844,120 @@
             const start = new Date(farmData.start_date);
             const now = new Date();
             const daysElapsed = Math.floor((now - start) / (1000 * 60 * 60 * 24));
-            let stage, progress;
+            let stage, progress, details, imageUrl;
 
             if (daysElapsed < 7) {
                 stage = 'Preparation of soil';
                 progress = 14;
+                details = `
+                    <h4 class="font-bold">Precautions:</h4>
+                    <p>Ensure proper drainage to avoid waterlogging. Avoid working on wet soil to prevent compaction.</p>
+                    <h4 class="font-bold">Measures:</h4>
+                    <p>Test soil pH and nutrients. Add organic matter like compost if needed.</p>
+                    <h4 class="font-bold">Steps:</h4>
+                    <ol class="list-decimal pl-5">
+                        <li>Clear weeds and debris from the field.</li>
+                        <li>Plow or till the soil to a depth of 6-8 inches.</li>
+                        <li>Level the land for even water distribution.</li>
+                    </ol>
+                `;
+                imageUrl = 'https://via.placeholder.com/300?text=Soil+Preparation';
             } else if (daysElapsed < 14) {
                 stage = 'Sowing';
                 progress = 28;
+                details = `
+                    <h4 class="font-bold">Precautions:</h4>
+                    <p>Use clean seeds to prevent disease spread. Sow at the recommended depth and spacing.</p>
+                    <h4 class="font-bold">Measures:</h4>
+                    <p>Check weather for optimal planting conditions. Ensure soil moisture is adequate.</p>
+                    <h4 class="font-bold">Steps:</h4>
+                    <ol class="list-decimal pl-5">
+                        <li>Mark rows or beds for planting.</li>
+                        <li>Place seeds at the correct depth and cover with soil.</li>
+                        <li>Water gently to settle the seeds.</li>
+                    </ol>
+                `;
+                imageUrl = 'https://via.placeholder.com/300?text=Sowing';
             } else if (daysElapsed < 30) {
                 stage = 'Adding fertilizers and manures';
                 progress = 43;
+                details = `
+                    <h4 class="font-bold">Precautions:</h4>
+                    <p>Avoid over-fertilization to prevent nutrient burn. Use organic options to maintain soil health.</p>
+                    <h4 class="font-bold">Measures:</h4>
+                    <p>Test soil for deficiencies. Apply compost or manure evenly.</p>
+                    <h4 class="font-bold">Steps:</h4>
+                    <ol class="list-decimal pl-5">
+                        <li>Spread manure or compost over the field.</li>
+                        <li>Incorporate into the topsoil with light tilling.</li>
+                        <li>Water the field lightly after application.</li>
+                    </ol>
+                `;
+                imageUrl = 'https://via.placeholder.com/300?text=Fertilizing';
             } else if (daysElapsed < 60) {
                 stage = 'Irrigation';
                 progress = 57;
+                details = `
+                    <h4 class="font-bold">Precautions:</h4>
+                    <p>Avoid overwatering to prevent root rot. Monitor soil moisture regularly.</p>
+                    <h4 class="font-bold">Measures:</h4>
+                    <p>Use drip irrigation for efficiency. Check water quality.</p>
+                    <h4 class="font-bold">Steps:</h4>
+                    <ol class="list-decimal pl-5">
+                        <li>Schedule irrigation based on crop needs.</li>
+                        <li>Apply water evenly across the field.</li>
+                        <li>Check for drainage issues post-irrigation.</li>
+                    </ol>
+                `;
+                imageUrl = 'https://via.placeholder.com/300?text=Irrigation';
             } else if (daysElapsed < 90) {
                 stage = 'Protection from weeds or pests';
                 progress = 71;
+                details = `
+                    <h4 class="font-bold">Precautions:</h4>
+                    <p>Use organic pesticides to avoid chemical residue. Monitor pest levels regularly.</p>
+                    <h4 class="font-bold">Measures:</h4>
+                    <p>Remove weeds manually or with mulch. Apply neem oil spray if pests are detected.</p>
+                    <h4 class="font-bold">Steps:</h4>
+                    <ol class="list-decimal pl-5">
+                        <li>Inspect plants for pests and weeds.</li>
+                        <li>Apply organic pest control as needed.</li>
+                        <li>Clear weed growth around crops.</li>
+                    </ol>
+                `;
+                imageUrl = 'https://via.placeholder.com/300?text=Pest+Protection';
             } else if (daysElapsed < 120) {
                 stage = 'Harvesting';
                 progress = 86;
+                details = `
+                    <h4 class="font-bold">Precautions:</h4>
+                    <p>Harvest at the right maturity to ensure quality. Use clean tools to avoid contamination.</p>
+                    <h4 class="font-bold">Measures:</h4>
+                    <p>Check crop readiness by visual inspection. Plan for timely transport.</p>
+                    <h4 class="font-bold">Steps:</h4>
+                    <ol class="list-decimal pl-5">
+                        <li>Assess crop maturity.</li>
+                        <li>Cut or pick crops carefully.</li>
+                        <li>Collect and sort the harvest.</li>
+                    </ol>
+                `;
+                imageUrl = 'https://via.placeholder.com/300?text=Harvesting';
             } else {
                 stage = 'Storage of the yield';
                 progress = 100;
+                details = `
+                    <h4 class="font-bold">Precautions:</h4>
+                    <p>Store in a cool, dry place to prevent spoilage. Check for pests in storage.</p>
+                    <h4 class="font-bold">Measures:</h4>
+                    <p>Use ventilated containers. Monitor temperature and humidity.</p>
+                    <h4 class="font-bold">Steps:</h4>
+                    <ol class="list-decimal pl-5">
+                        <li>Clean and dry the yield.</li>
+                        <li>Pack in suitable containers.</li>
+                        <li>Store in a controlled environment.</li>
+                    </ol>
+                `;
+                imageUrl = 'https://via.placeholder.com/300?text=Storage';
             }
 
             document.getElementById('progressBar').innerHTML = `
@@ -808,6 +966,10 @@
                 </div>
             `;
             document.getElementById('currentStage').textContent = `Current Stage: ${stage} (${daysElapsed} days elapsed)`;
+            document.getElementById('stageDetails').innerHTML = details;
+            const stageImage = document.getElementById('stageImage');
+            stageImage.src = imageUrl;
+            stageImage.classList.remove('hidden');
         }
 
         // Initial load
