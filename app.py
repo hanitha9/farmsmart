@@ -159,18 +159,36 @@ def login():
 def recommend():
     try:
         data = request.get_json()
+        if not data:
+            logger.error("No JSON data received")
+            return jsonify({"error": "Invalid request data"}), 400
+
         logger.info(f"Received data: {data}")
+        if 'farmer_id' not in data:
+            logger.error("Missing farmer_id")
+            return jsonify({"error": "Farmer ID is required"}), 400
         farmer_id = data['farmer_id']
-        location = data['location']
-        land_size = float(data['land_size'])
-        soil_option = data['soil_option']
-        start_date = data['start_date']
+
+        location = data.get('location', '')
+        land_size = float(data.get('land_size', 0))
+        soil_option = data.get('soil_option', '')
+        start_date = data.get('start_date', '')
         water_available = float(data.get('water_available', 0))
 
+        if not location or land_size <= 0 or not soil_option or not start_date:
+            logger.error("Invalid input data")
+            return jsonify({"error": "All required fields must be provided and valid"}), 400
+
         if soil_option == 'manual':
+            if 'soil_type' not in data:
+                logger.error("Missing soil_type for manual option")
+                return jsonify({"error": "Soil type is required for manual selection"}), 400
             soil_type = data['soil_type']
             logger.info(f"Manual soil type: {soil_type}")
         else:
+            if not all(k in data for k in ['r', 'g', 'b', 'ph', 'ec']):
+                logger.error("Missing sensor data")
+                return jsonify({"error": "Sensor data (r, g, b, ph, ec) required"}), 400
             r, g, b = data['r'], data['g'], data['b']
             ph, ec = data['ph'], data['ec']
             soil_type = model.predict([[r, g, b, ph, ec]])[0]
@@ -213,7 +231,11 @@ def recommend():
         # Generate watering schedule
         selected_crop = recommendations[0]['crop']
         base_water = recommendations[0]['water_requirement'] * land_size
-        soil_adjust = {'Sandy Soil': 1.2, 'Black Cotton Soil - Deep Black Soil': 0.8}.get(soil_type, 1.0)
+        soil_adjust = {
+            'Sandy Soil': 1.2,
+            'Black Cotton Soil - Deep Black Soil': 0.8,
+            'Coastal Alluvial': 1.0
+        }.get(soil_type, 1.0)
         total_water = base_water * soil_adjust
         schedule = []
         for i in range(7):
@@ -255,13 +277,17 @@ def recommend():
         }), 200
     except Exception as e:
         logger.error(f"Recommendation error: {e}")
-        return jsonify({"error": "Failed to generate recommendations"}), 500
+        return jsonify({"error": f"Failed to generate recommendations: {str(e)}"}), 500
 
 # Monitoring endpoint
 @app.route('/api/monitor', methods=['GET'])
 def monitor():
     try:
         farmer_id = request.args.get('farmer_id')
+        if not farmer_id:
+            logger.error("Missing farmer_id for monitoring")
+            return jsonify({"error": "Farmer ID is required"}), 400
+
         conn = sqlite3.connect('farm.db')
         c = conn.cursor()
         c.execute("SELECT start_date, selected_crop FROM farm_data WHERE farmer_id = ? ORDER BY created_at DESC LIMIT 1", 
