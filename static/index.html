@@ -270,8 +270,8 @@
                     </div>
                     <div>
                         <h4 class="font-bold">7. Diatomaceous Earth</h4>
-                        <p><strong>Proportions:</strong> 100g food-grade diatomaceous earth, 1 liter water (for slurry)</p>
-                        <p><strong>Process:</strong> Mix diatomaceous earth with water to create a slurry, then sprinkle or spray on soil around plants to deter crawling insects. Reapply after rain, every 7-10 days.</p>
+                    <p><strong>Proportions:</strong> 100g food-grade diatomaceous earth, 1 liter water (for slurry)</p>
+                    <p><strong>Process:</strong> Mix diatomaceous earth with water to create a slurry, then sprinkle or spray on soil around plants to deter crawling insects. Reapply after rain, every 7-10 days.</p>
                     </div>
                     <div>
                         <h4 class="font-bold">8. Mint Spray</h4>
@@ -318,6 +318,7 @@
         let selectedCrop = null;
         let soilType = null;
         let farmData = null;
+        let manualStage = null; // Store manually selected stage
 
         // Toggle auth form
         const toggleAuth = document.getElementById('toggleAuth');
@@ -515,15 +516,12 @@
                 soilType = result.soil_type;
                 document.getElementById('soilType').textContent = `Soil Type: ${soilType}`;
                 const recommendationsList = document.getElementById('recommendationsList');
-                // Filter out wheat and include vegetables like brinjal
-                const filteredRecommendations = result.recommendations.filter(r => r.crop !== 'wheat').map(r => ({
-                    ...r,
-                    crop: r.crop === 'wheat' ? 'brinjal' : r.crop // Replace wheat with brinjal as a fallback
-                })).concat([
+                // Filter out wheat and limit to 3 vegetable recommendations
+                const filteredRecommendations = [
                     { crop: 'brinjal', image_url: 'https://via.placeholder.com/100?text=Brinjal', nutrients: '50 kg/acre', water_requirement: '300 L/acre', cost: '$200', yield: '2000 kg/acre', market_trend: 'Stable' },
                     { crop: 'tomato', image_url: 'https://via.placeholder.com/100?text=Tomato', nutrients: '60 kg/acre', water_requirement: '400 L/acre', cost: '$250', yield: '2500 kg/acre', market_trend: 'Rising' },
                     { crop: 'okra', image_url: 'https://via.placeholder.com/100?text=Okra', nutrients: '45 kg/acre', water_requirement: '350 L/acre', cost: '$180', yield: '1800 kg/acre', market_trend: 'Stable' }
-                ]);
+                ];
                 recommendationsList.innerHTML = filteredRecommendations.map(r => `
                     <div class="crop-card p-4 rounded-lg flex flex-col items-center bg-white">
                         <img src="${r.image_url}" alt="${r.crop}" class="crop-image mb-2" onerror="this.src='https://via.placeholder.com/100';">
@@ -792,6 +790,7 @@
                 return;
             }
             const newStage = document.getElementById('updateStage').value;
+            manualStage = newStage; // Store the manually selected stage
             try {
                 const response = await fetch('/api/update_stage', {
                     method: 'POST',
@@ -813,7 +812,7 @@
                     </div>
                 `;
                 document.getElementById('currentStage').textContent = `Current Stage: ${result.stage}`;
-                updateProgress();
+                updateProgress(); // Refresh stage details using the manual stage
             } catch (err) {
                 alert('Failed to update stage: ' + err.message);
             }
@@ -825,6 +824,7 @@
             selectedCrop = null;
             soilType = null;
             farmData = null;
+            manualStage = null; // Reset manual stage on logout
             document.getElementById('farm-input').classList.add('hidden');
             document.getElementById('login').classList.remove('hidden');
             document.getElementById('logoutBtn').classList.add('hidden');
@@ -838,16 +838,41 @@
             setupTabNavigation();
         });
 
-        // Update crop progress based on start date
+        // Update crop progress based on start date or manual selection
         function updateProgress() {
-            if (!farmData?.start_date || !selectedCrop) return;
-            const start = new Date(farmData.start_date);
-            const now = new Date();
-            const daysElapsed = Math.floor((now - start) / (1000 * 60 * 60 * 24));
-            let stage, progress, details, imageUrl;
+            if (!selectedCrop) return;
 
-            if (daysElapsed < 7) {
-                stage = 'Preparation of soil';
+            let stage, progress, details, imageUrl;
+            let daysElapsed = 0;
+
+            // If a manual stage is selected, use it; otherwise, calculate based on days elapsed
+            if (manualStage) {
+                stage = manualStage;
+            } else if (farmData?.start_date) {
+                const start = new Date(farmData.start_date);
+                const now = new Date();
+                daysElapsed = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+                if (daysElapsed < 7) {
+                    stage = 'Preparation of soil';
+                } else if (daysElapsed < 14) {
+                    stage = 'Sowing';
+                } else if (daysElapsed < 30) {
+                    stage = 'Adding fertilizers and manures';
+                } else if (daysElapsed < 60) {
+                    stage = 'Irrigation';
+                } else if (daysElapsed < 90) {
+                    stage = 'Protection from weeds or pests';
+                } else if (daysElapsed < 120) {
+                    stage = 'Harvesting';
+                } else {
+                    stage = 'Storage of the yield';
+                }
+            } else {
+                stage = 'Preparation of soil'; // Default stage if no start date
+            }
+
+            // Define progress and details based on the stage
+            if (stage === 'Preparation of soil') {
                 progress = 14;
                 details = `
                     <h4 class="font-bold">Precautions:</h4>
@@ -862,8 +887,7 @@
                     </ol>
                 `;
                 imageUrl = 'https://via.placeholder.com/300?text=Soil+Preparation';
-            } else if (daysElapsed < 14) {
-                stage = 'Sowing';
+            } else if (stage === 'Sowing') {
                 progress = 28;
                 details = `
                     <h4 class="font-bold">Precautions:</h4>
@@ -878,8 +902,7 @@
                     </ol>
                 `;
                 imageUrl = 'https://via.placeholder.com/300?text=Sowing';
-            } else if (daysElapsed < 30) {
-                stage = 'Adding fertilizers and manures';
+            } else if (stage === 'Adding fertilizers and manures') {
                 progress = 43;
                 details = `
                     <h4 class="font-bold">Precautions:</h4>
@@ -894,8 +917,7 @@
                     </ol>
                 `;
                 imageUrl = 'https://via.placeholder.com/300?text=Fertilizing';
-            } else if (daysElapsed < 60) {
-                stage = 'Irrigation';
+            } else if (stage === 'Irrigation') {
                 progress = 57;
                 details = `
                     <h4 class="font-bold">Precautions:</h4>
@@ -910,8 +932,7 @@
                     </ol>
                 `;
                 imageUrl = 'https://via.placeholder.com/300?text=Irrigation';
-            } else if (daysElapsed < 90) {
-                stage = 'Protection from weeds or pests';
+            } else if (stage === 'Protection from weeds or pests') {
                 progress = 71;
                 details = `
                     <h4 class="font-bold">Precautions:</h4>
@@ -926,8 +947,7 @@
                     </ol>
                 `;
                 imageUrl = 'https://via.placeholder.com/300?text=Pest+Protection';
-            } else if (daysElapsed < 120) {
-                stage = 'Harvesting';
+            } else if (stage === 'Harvesting') {
                 progress = 86;
                 details = `
                     <h4 class="font-bold">Precautions:</h4>
@@ -942,8 +962,7 @@
                     </ol>
                 `;
                 imageUrl = 'https://via.placeholder.com/300?text=Harvesting';
-            } else {
-                stage = 'Storage of the yield';
+            } else if (stage === 'Storage of the yield') {
                 progress = 100;
                 details = `
                     <h4 class="font-bold">Precautions:</h4>
@@ -965,7 +984,7 @@
                     <div class="bg-green-600 h-4 rounded-full" style="width: ${progress}%"></div>
                 </div>
             `;
-            document.getElementById('currentStage').textContent = `Current Stage: ${stage} (${daysElapsed} days elapsed)`;
+            document.getElementById('currentStage').textContent = `Current Stage: ${stage}${manualStage ? '' : ' (' + daysElapsed + ' days elapsed)'}`;
             document.getElementById('stageDetails').innerHTML = details;
             const stageImage = document.getElementById('stageImage');
             stageImage.src = imageUrl;
