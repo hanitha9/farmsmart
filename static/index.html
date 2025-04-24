@@ -4,22 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FarmSmart - Precision Agriculture</title>
-    <!-- Base64 favicon to fix 404 error -->
     <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAACYSURBVFhH7ZYxDoAgDEQ7///0YgqWdpA+2MJoO0iPFiJABbYJYUwC4Xme5zFKBZmZeV4a8xH4qYg6dQeR5wloZma+Av8K0Mzs9yD/BrCzswf5N4Cdne0g/wZwZ+eP5C8AOzv7kH8D2NnZG/k3gJ2dPZK/AOzs7IH8G8DOzh7k3wB2dvZA/g1gZ2cP5N8Adna2g/wbwM7OHuTfAHZ29kD+DWBNuLshOifhAAAAAElFTkSuQmCC">
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.css" rel="stylesheet" />
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Inter', sans-serif;
         }
         .hidden {
             display: none;
+        }
+        .crop-card {
+            transition: transform 0.3s;
+        }
+        .crop-card:hover {
+            transform: scale(1.02);
         }
     </style>
 </head>
 <body class="bg-gray-100">
     <!-- Navbar -->
-    <nav class="bg-green-600 text-white p-4">
+    <nav class="bg-green-700 text-white p-4">
         <div class="container mx-auto flex justify-between items-center">
             <h1 class="text-2xl font-bold">FarmSmart</h1>
             <div>
@@ -28,139 +33,214 @@
         </div>
     </nav>
 
-    <!-- Main Container -->
+    <!-- Tabs Navigation -->
     <div class="container mx-auto p-4">
-        <!-- Auth Section -->
-        <div id="authSection" class="bg-white p-6 rounded shadow-md max-w-md mx-auto">
-            <h2 id="authTitle" class="text-2xl font-bold mb-4 text-center">Login</h2>
-            <form id="authForm">
-                <div id="nameField" class="mb-4 hidden">
-                    <label class="block text-gray-700">Name</label>
-                    <input type="text" id="name" class="w-full p-2 border rounded" required>
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700">Email</label>
-                    <input type="email" id="email" class="w-full p-2 border rounded" required>
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700">Password</label>
-                    <input type="password" id="password" class="w-full p-2 border rounded" required>
-                </div>
-                <button type="submit" id="authSubmit" class="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700">Login</button>
-            </form>
-            <p class="mt-4 text-center">
-                <a id="toggleAuth" href="#" class="text-green-600 hover:underline">Register instead</a>
-            </p>
-            <div id="authError" class="text-red-500 mt-4 hidden"></div>
-            <div id="authLoading" class="text-center mt-4 hidden">Loading...</div>
+        <div class="border-b border-gray-200">
+            <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="tabs" role="tablist">
+                <li class="mr-2" role="presentation">
+                    <button class="inline-block p-4 border-b-2 rounded-t-lg" id="input-tab" type="button" role="tab" aria-controls="input" aria-selected="true">Farm Input</button>
+                </li>
+                <li class="mr-2 hidden" role="presentation" id="recommendations-tab-li">
+                    <button class="inline-block p-4 border-b-2 rounded-t-lg" id="recommendations-tab" type="button" role="tab" aria-controls="recommendations" aria-selected="false">Recommendations</button>
+                </li>
+                <li class="mr-2 hidden" role="presentation" id="crop-details-tab-li">
+                    <button class="inline-block p-4 border-b-2 rounded-t-lg" id="crop-details-tab" type="button" role="tab" aria-controls="crop-details" aria-selected="false">Crop Details</button>
+                </li>
+                <li class="mr-2 hidden" role="presentation" id="water-schedule-tab-li">
+                    <button class="inline-block p-4 border-b-2 rounded-t-lg" id="water-schedule-tab" type="button" role="tab" aria-controls="water-schedule" aria-selected="false">Water Schedule</button>
+                </li>
+                <li class="mr-2 hidden" role="presentation" id="nutrient-schedule-tab-li">
+                    <button class="inline-block p-4 border-b-2 rounded-t-lg" id="nutrient-schedule-tab" type="button" role="tab" aria-controls="nutrient-schedule" aria-selected="false">Nutrient Schedule</button>
+                </li>
+                <li class="mr-2 hidden" role="presentation" id="motor-status-tab-li">
+                    <button class="inline-block p-4 border-b-2 rounded-t-lg" id="motor-status-tab" type="button" role="tab" aria-controls="motor-status" aria-selected="false">Motor Status</button>
+                </li>
+                <li class="mr-2 hidden" role="presentation" id="notifications-tab-li">
+                    <button class="inline-block p-4 border-b-2 rounded-t-lg" id="notifications-tab" type="button" role="tab" aria-controls="notifications" aria-selected="false">Notifications</button>
+                </li>
+                <li class="mr-2 hidden" role="presentation" id="pesticides-tab-li">
+                    <button class="inline-block p-4 border-b-2 rounded-t-lg" id="pesticides-tab" type="button" role="tab" aria-controls="pesticides" aria-selected="false">Organic Pesticides</button>
+                </li>
+                <li class="mr-2 hidden" role="presentation" id="progress-tab-li">
+                    <button class="inline-block p-4 border-b-2 rounded-t-lg" id="progress-tab" type="button" role="tab" aria-controls="progress" aria-selected="false">Crop Progress</button>
+                </li>
+            </ul>
         </div>
 
-        <!-- Dashboard Section -->
-        <div id="dashboard" class="hidden">
-            <h2 class="text-2xl font-bold mb-4">FarmSmart Dashboard</h2>
-            <!-- Farm Input Section -->
-            <div class="bg-white p-6 rounded shadow-md mb-6">
-                <h3 class="text-xl font-bold mb-4">Enter Farm Details</h3>
-                <form id="farmForm">
-                    <div class="mb-4">
-                        <label class="block text-gray-700">Location</label>
-                        <input type="text" id="location" class="w-full p-2 border rounded" required>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-gray-700">Land Size (acres)</label>
-                        <input type="number" id="landSize" class="w-full p-2 border rounded" step="0.1" min="0.1" required>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-gray-700">Water Available (L)</label>
-                        <input type="number" id="waterAvailable" class="w-full p-2 border rounded" step="100" min="0">
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-gray-700">Start Date</label>
-                        <input type="date" id="startDate" class="w-full p-2 border rounded" required>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-gray-700">Soil Input Method</label>
-                        <select id="soilOption" class="w-full p-2 border rounded" onchange="toggleSoilInput()">
-                            <option value="manual">Manual Selection</option>
-                            <option value="sensor">Sensor Input</option>
-                        </select>
-                    </div>
-                    <!-- Manual Soil Selection -->
-                    <div id="manualSoil" class="mb-4">
-                        <label class="block text-gray-700">Soil Type</label>
-                        <select id="soilType" class="w-full p-2 border rounded" required>
-                            <option value="Coastal Alluvial">Coastal Alluvial</option>
-                            <option value="Sandy Soil">Sandy Soil</option>
-                            <option value="Loamy Soil">Loamy Soil</option>
-                            <option value="Laterite Soil">Laterite Soil</option>
-                            <option value="Red Sandy Loam - Fine Sandy Loam">Red Sandy Loam - Fine Sandy Loam</option>
-                            <option value="Red Sandy Loam - Coarse Sandy Loam">Red Sandy Loam - Coarse Sandy Loam</option>
-                            <option value="Red Sandy Loam - Gravelly Sandy Loam">Red Sandy Loam - Gravelly Sandy Loam</option>
-                            <option value="Black Cotton Soil - Shallow Black Soil">Black Cotton Soil - Shallow Black Soil</option>
-                            <option value="Black Cotton Soil - Medium Black Soil">Black Cotton Soil - Medium Black Soil</option>
-                            <option value="Black Cotton Soil - Deep Black Soil">Black Cotton Soil - Deep Black Soil</option>
-                        </select>
-                    </div>
-                    <!-- Sensor Soil Input -->
-                    <div id="sensorSoil" class="hidden">
-                        <div class="mb-4">
-                            <label class="block text-gray-700">R (0-255)</label>
-                            <input type="number" id="r" class="w-full p-2 border rounded" min="0" max="255">
+        <!-- Tab Content -->
+        <div id="tab-content">
+            <!-- Farm Input -->
+            <div class="p-4 rounded-lg bg-gray-50" id="input" role="tabpanel" aria-labelledby="input-tab">
+                <div id="authSection" class="bg-white p-6 rounded-lg shadow-md max-w-md mx-auto">
+                    <h2 id="authTitle" class="text-2xl font-bold mb-4 text-center">Login</h2>
+                    <form id="authForm">
+                        <div id="nameField" class="mb-4 hidden">
+                            <label class="block text-gray-700">Name</label>
+                            <input type="text" id="name" class="w-full p-2 border rounded" required>
                         </div>
                         <div class="mb-4">
-                            <label class="block text-gray-700">G (0-255)</label>
-                            <input type="number" id="g" class="w-full p-2 border rounded" min="0" max="255">
+                            <label class="block text-gray-700">Email</label>
+                            <input type="email" id="email" class="w-full p-2 border rounded" required>
                         </div>
                         <div class="mb-4">
-                            <label class="block text-gray-700">B (0-255)</label>
-                            <input type="number" id="b" class="w-full p-2 border rounded" min="0" max="255">
+                            <label class="block text-gray-700">Password</label>
+                            <input type="password" id="password" class="w-full p-2 border rounded" required>
+                        </div>
+                        <button type="submit" id="authSubmit" class="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700">Login</button>
+                    </form>
+                    <p class="mt-4 text-center">
+                        <a id="toggleAuth" href="#" class="text-green-600 hover:underline">Register instead</a>
+                    </p>
+                    <div id="authError" class="text-red-500 mt-4 hidden"></div>
+                    <div id="authLoading" class="text-center mt-4 hidden">Loading...</div>
+                </div>
+
+                <div id="inputForm" class="hidden bg-white p-6 rounded-lg shadow-md mt-6">
+                    <h3 class="text-xl font-bold mb-4">Enter Farm Details</h3>
+                    <form id="farmForm">
+                        <div class="mb-4">
+                            <label class="block text-gray-700">Location</label>
+                            <input type="text" id="location" class="w-full p-2 border rounded" required>
                         </div>
                         <div class="mb-4">
-                            <label class="block text-gray-700">pH (0-14)</label>
-                            <input type="number" id="ph" class="w-full p-2 border rounded" step="0.1" min="0" max="14">
+                            <label class="block text-gray-700">Land Size (acres)</label>
+                            <input type="number" id="landSize" class="w-full p-2 border rounded" step="0.1" min="0.1" required>
                         </div>
                         <div class="mb-4">
-                            <label class="block text-gray-700">EC (mS/cm)</label>
-                            <input type="number" id="ec" class="w-full p-2 border rounded" step="0.01" min="0">
+                            <label class="block text-gray-700">Water Available (L)</label>
+                            <input type="number" id="waterAvailable" class="w-full p-2 border rounded" step="100" min="0">
                         </div>
-                    </div>
-                    <button type="submit" id="submitBtn" class="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700">Get Recommendations</button>
-                </form>
-                <div id="farmError" class="text-red-500 mt-4 hidden"></div>
-                <div id="farmLoading" class="text-center mt-4 hidden">Loading...</div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700">Start Date</label>
+                            <input type="date" id="startDate" class="w-full p-2 border rounded" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700">Soil Input Method</label>
+                            <select id="soilOption" class="w-full p-2 border rounded" onchange="toggleSoilInput()">
+                                <option value="manual">Manual Selection</option>
+                                <option value="sensor">Sensor Input</option>
+                            </select>
+                        </div>
+                        <div id="manualSoil" class="mb-4">
+                            <label class="block text-gray-700">Soil Type</label>
+                            <select id="soilType" class="w-full p-2 border rounded" required>
+                                <option value="Coastal Alluvial">Coastal Alluvial</option>
+                                <option value="Sandy Soil">Sandy Soil</option>
+                                <option value="Loamy Soil">Loamy Soil</option>
+                                <option value="Laterite Soil">Laterite Soil</option>
+                                <option value="Red Sandy Loam - Fine Sandy Loam">Red Sandy Loam - Fine Sandy Loam</option>
+                                <option value="Red Sandy Loam - Coarse Sandy Loam">Red Sandy Loam - Coarse Sandy Loam</option>
+                                <option value="Red Sandy Loam - Gravelly Sandy Loam">Red Sandy Loam - Gravelly Sandy Loam</option>
+                                <option value="Black Cotton Soil - Shallow Black Soil">Black Cotton Soil - Shallow Black Soil</option>
+                                <option value="Black Cotton Soil - Medium Black Soil">Black Cotton Soil - Medium Black Soil</option>
+                                <option value="Black Cotton Soil - Deep Black Soil">Black Cotton Soil - Deep Black Soil</option>
+                            </select>
+                        </div>
+                        <div id="sensorSoil" class="hidden">
+                            <div class="mb-4">
+                                <label class="block text-gray-700">R (0-255)</label>
+                                <input type="number" id="r" class="w-full p-2 border rounded" min="0" max="255">
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700">G (0-255)</label>
+                                <input type="number" id="g" class="w-full p-2 border rounded" min="0" max="255">
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700">B (0-255)</label>
+                                <input type="number" id="b" class="w-full p-2 border rounded" min="0" max="255">
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700">pH (0-14)</label>
+                                <input type="number" id="ph" class="w-full p-2 border rounded" step="0.1" min="0" max="14">
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700">EC (mS/cm)</label>
+                                <input type="number" id="ec" class="w-full p-2 border rounded" step="0.01" min="0">
+                            </div>
+                        </div>
+                        <button type="submit" id="submitBtn" class="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700">Get Recommendations</button>
+                    </form>
+                    <div id="farmError" class="text-red-500 mt-4 hidden"></div>
+                    <div id="farmLoading" class="text-center mt-4 hidden">Loading...</div>
+                </div>
             </div>
-            <!-- Recommendations Section -->
-            <div id="recommendationsSection" class="bg-white p-6 rounded shadow-md mb-6 hidden">
+
+            <!-- Recommendations -->
+            <div class="hidden p-4 rounded-lg bg-gray-50" id="recommendations" role="tabpanel" aria-labelledby="recommendations-tab">
                 <h3 class="text-xl font-bold mb-4">Crop Recommendations</h3>
-                <div id="recommendations"></div>
+                <p id="soilType" class="mb-4"></p>
+                <div id="recommendationsList" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
             </div>
-            <!-- Schedule Section -->
-            <div id="scheduleSection" class="bg-white p-6 rounded shadow-md mb-6 hidden">
+
+            <!-- Crop Details -->
+            <div class="hidden p-4 rounded-lg bg-gray-50" id="crop-details" role="tabpanel" aria-labelledby="crop-details-tab">
+                <h3 class="text-xl font-bold mb-4">Crop Details</h3>
+                <div id="cropDetails"></div>
+            </div>
+
+            <!-- Water Schedule -->
+            <div class="hidden p-4 rounded-lg bg-gray-50" id="water-schedule" role="tabpanel" aria-labelledby="water-schedule-tab">
                 <h3 class="text-xl font-bold mb-4">Watering Schedule</h3>
-                <div id="schedule"></div>
+                <button id="generateWaterSchedule" class="bg-green-600 text-white p-2 rounded hover:bg-green-700 mb-4">Generate Water Schedule</button>
+                <div id="waterSchedule"></div>
             </div>
-            <!-- Monitoring Section -->
-            <div id="monitoringSection" class="bg-white p-6 rounded shadow-md hidden">
-                <h3 class="text-xl font-bold mb-4">Farm Monitoring</h3>
-                <button id="refreshMonitoring" class="bg-green-600 text-white p-2 rounded hover:bg-green-700 mb-4">Refresh Data</button>
-                <div id="monitoring"></div>
-                <div id="monitoringError" class="text-red-500 mt-4 hidden"></div>
-                <div id="monitoringLoading" class="text-center mt-4 hidden">Loading...</div>
+
+            <!-- Nutrient Schedule -->
+            <div class="hidden p-4 rounded-lg bg-gray-50" id="nutrient-schedule" role="tabpanel" aria-labelledby="nutrient-schedule-tab">
+                <h3 class="text-xl font-bold mb-4">Nutrient Schedule</h3>
+                <button id="generateNutrientSchedule" class="bg-green-600 text-white p-2 rounded hover:bg-green-700 mb-4">Generate Nutrient Schedule</button>
+                <div id="nutrientSchedule"></div>
+            </div>
+
+            <!-- Motor Status -->
+            <div class="hidden p-4 rounded-lg bg-gray-50" id="motor-status" role="tabpanel" aria-labelledby="motor-status-tab">
+                <h3 class="text-xl font-bold mb-4">Motor Status</h3>
+                <button id="checkMotorStatus" class="bg-green-600 text-white p-2 rounded hover:bg-green-700 mb-4">Check Motor Status</button>
+                <div id="motorStatus"></div>
+            </div>
+
+            <!-- Notifications -->
+            <div class="hidden p-4 rounded-lg bg-gray-50" id="notifications" role="tabpanel" aria-labelledby="notifications-tab">
+                <h3 class="text-xl font-bold mb-4">Notifications</h3>
+                <div id="notificationsList"></div>
+            </div>
+
+            <!-- Organic Pesticides -->
+            <div class="hidden p-4 rounded-lg bg-gray-50" id="pesticides" role="tabpanel" aria-labelledby="pesticides-tab">
+                <h3 class="text-xl font-bold mb-4">Organic Pesticides</h3>
+                <div id="pesticidesInfo"></div>
+            </div>
+
+            <!-- Crop Progress -->
+            <div class="hidden p-4 rounded-lg bg-gray-50" id="progress" role="tabpanel" aria-labelledby="progress-tab">
+                <h3 class="text-xl font-bold mb-4">Crop Progress</h3>
+                <div id="progressBar" class="mb-4"></div>
+                <div id="currentStage" class="mb-4"></div>
+                <select id="updateStage" class="p-2 border rounded mb-4">
+                    <option value="Germination">Germination</option>
+                    <option value="Vegetative Growth">Vegetative Growth</option>
+                    <option value="Flowering">Flowering</option>
+                    <option value="Harvesting">Harvesting</option>
+                </select>
+                <button id="updateStageBtn" class="bg-green-600 text-white p-2 rounded hover:bg-green-700">Update Stage</button>
             </div>
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
     <script>
         let farmerId = null;
+        let selectedCrop = null;
+        let soilType = null;
+        let farmData = null;
 
-        // Toggle between login and register
+        // Toggle auth form
         const toggleAuth = document.getElementById('toggleAuth');
         const authTitle = document.getElementById('authTitle');
         const authSubmit = document.getElementById('authSubmit');
         const nameField = document.getElementById('nameField');
         toggleAuth.addEventListener('click', (e) => {
             e.preventDefault();
-            alert('Toggling auth mode');
             const isLogin = authTitle.textContent === 'Login';
             authTitle.textContent = isLogin ? 'Register' : 'Login';
             authSubmit.textContent = isLogin ? 'Register' : 'Login';
@@ -171,7 +251,6 @@
         // Handle auth form submission
         document.getElementById('authForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            alert('Submitting auth form');
             console.log('Auth form submitted');
             const isLogin = authTitle.textContent === 'Login';
             const endpoint = isLogin ? '/api/login' : '/api/register';
@@ -194,51 +273,41 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
-                console.log('Auth response status:', response.status);
                 const result = await response.json();
                 authLoading.classList.add('hidden');
 
                 if (!response.ok) {
                     authError.textContent = result.error || 'Authentication failed';
                     authError.classList.remove('hidden');
-                    alert('Auth failed: ' + authError.textContent);
                     return;
                 }
 
                 if (isLogin) {
                     farmerId = result.farmer_id;
-                    console.log('Logged in, farmerId:', farmerId);
-                    alert('Login successful, farmerId: ' + farmerId);
                     document.getElementById('authSection').classList.add('hidden');
-                    document.getElementById('dashboard').classList.remove('hidden');
+                    document.getElementById('inputForm').classList.remove('hidden');
                     document.getElementById('logoutBtn').classList.remove('hidden');
-                    loadMonitoring();
                 } else {
                     authError.textContent = result.message;
                     authError.classList.remove('hidden');
                     authError.classList.remove('text-red-500');
                     authError.classList.add('text-green-500');
-                    alert('Registration successful');
                 }
             } catch (err) {
                 console.error('Auth error:', err);
                 authLoading.classList.add('hidden');
                 authError.textContent = 'Network error occurred';
                 authError.classList.remove('hidden');
-                alert('Auth network error: ' + err.message);
             }
         });
 
-        // Toggle soil input method
+        // Toggle soil input
         function toggleSoilInput() {
-            console.log('Toggling soil input');
-            alert('Toggling soil input method');
             const soilOption = document.getElementById('soilOption').value;
             document.getElementById('manualSoil').classList.toggle('hidden', soilOption !== 'manual');
             document.getElementById('sensorSoil').classList.toggle('hidden', soilOption !== 'sensor');
             document.getElementById('soilType').required = soilOption === 'manual';
-            const sensorInputs = ['r', 'g', 'b', 'ph', 'ec'];
-            sensorInputs.forEach(id => {
+            ['r', 'g', 'b', 'ph', 'ec'].forEach(id => {
                 document.getElementById(id).required = soilOption === 'sensor';
             });
         }
@@ -246,7 +315,6 @@
         // Handle farm form submission
         document.getElementById('farmForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            alert('Farm form submitted');
             console.log('Farm form submitted');
             const farmError = document.getElementById('farmError');
             const farmLoading = document.getElementById('farmLoading');
@@ -257,11 +325,10 @@
                 farmError.textContent = 'Please login to submit farm details';
                 farmError.classList.remove('hidden');
                 farmLoading.classList.add('hidden');
-                alert('Error: Please login first');
                 return;
             }
 
-            const data = {
+            farmData = {
                 farmer_id: farmerId,
                 location: document.getElementById('location').value,
                 land_size: parseFloat(document.getElementById('landSize').value),
@@ -270,149 +337,367 @@
                 water_available: parseFloat(document.getElementById('waterAvailable').value) || 0
             };
 
-            if (data.soil_option === 'manual') {
-                data.soil_type = document.getElementById('soilType').value;
+            if (farmData.soil_option === 'manual') {
+                farmData.soil_type = document.getElementById('soilType').value;
             } else {
-                data.r = parseInt(document.getElementById('r').value) || 0;
-                data.g = parseInt(document.getElementById('g').value) || 0;
-                data.b = parseInt(document.getElementById('b').value) || 0;
-                data.ph = parseFloat(document.getElementById('ph').value) || 0;
-                data.ec = parseFloat(document.getElementById('ec').value) || 0;
+                farmData.r = parseInt(document.getElementById('r').value) || 0;
+                farmData.g = parseInt(document.getElementById('g').value) || 0;
+                farmData.b = parseInt(document.getElementById('b').value) || 0;
+                farmData.ph = parseFloat(document.getElementById('ph').value) || 0;
+                farmData.ec = parseFloat(document.getElementById('ec').value) || 0;
             }
 
-            console.log('Sending data to /api/recommend:', data);
-            alert('Sending request to server');
+            console.log('Sending data to /api/recommend:', farmData);
             try {
                 const response = await fetch('/api/recommend', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify(farmData)
                 });
                 console.log('Recommend response status:', response.status);
-                alert('Received response with status: ' + response.status);
                 const result = await response.json();
-                console.log('Recommend response data:', result);
                 farmLoading.classList.add('hidden');
 
                 if (!response.ok) {
                     farmError.textContent = result.error || 'Failed to get recommendations';
                     farmError.classList.remove('hidden');
-                    alert('Error from server: ' + farmError.textContent);
                     return;
                 }
 
-                // Display recommendations
-                const recommendations = document.getElementById('recommendations');
-                recommendations.innerHTML = `
-                    <p><strong>Soil Type:</strong> ${result.soil_type}</p>
-                    <h4 class="font-bold mt-4">Recommended Crops:</h4>
-                    <ul class="list-disc pl-5">
-                        ${result.recommendations.map(r => `
-                            <li>
-                                <strong>${r.crop}</strong>: 
-                                Nutrients: ${r.nutrients} kg/acre, 
-                                Water: ${r.water_requirement} L/acre, 
-                                Cost: ${r.cost}, 
-                                Yield: ${r.yield}, 
-                                Market Trend: ${r.market_trend}
-                            </li>
-                        `).join('')}
-                    </ul>
-                `;
-                document.getElementById('recommendationsSection').classList.remove('hidden');
+                soilType = result.soil_type;
+                document.getElementById('soilType').textContent = `Soil Type: ${soilType}`;
+                const recommendationsList = document.getElementById('recommendationsList');
+                recommendationsList.innerHTML = result.recommendations.map(r => `
+                    <div class="crop-card bg-white p-4 rounded-lg shadow-md flex flex-col md:flex-row">
+                        <div class="md:w-2/3">
+                            <h4 class="font-bold text-lg">${r.crop}</h4>
+                            <p>Nutrients: ${r.nutrients} kg/acre</p>
+                            <p>Water: ${r.water_requirement} L/acre</p>
+                            <p>Cost: ${r.cost}</p>
+                            <p>Yield: ${r.yield}</p>
+                            <p>Market Trend: ${r.market_trend}</p>
+                            <button class="select-crop bg-green-600 text-white p-2 rounded hover:bg-green-700 mt-2" data-crop="${r.crop}">Select</button>
+                        </div>
+                        <img src="${r.image_url}" alt="${r.crop}" class="md:w-1/3 h-32 object-cover rounded-lg mt-4 md:mt-0">
+                    </div>
+                `).join('');
 
-                // Display schedule
-                const schedule = document.getElementById('schedule');
-                schedule.innerHTML = `
-                    <table class="w-full border-collapse border">
-                        <thead>
-                            <tr class="bg-gray-200">
-                                <th class="border p-2">Day</th>
-                                <th class="border p-2">Time</th>
-                                <th class="border p-2">Water Quantity (L)</th>
-                                <th class="border p-2">Method</th>
-                                <th class="border p-2">Speed</th>
-                                <th class="border p-2">Duration</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${result.schedule.map(s => `
-                                <tr>
-                                    <td class="border p-2">${s.day}</td>
-                                    <td class="border p-2">${s.time}</td>
-                                    <td class="border p-2">${s.water_quantity}</td>
-                                    <td class="border p-2">${s.method}</td>
-                                    <td class="border p-2">${s.speed}</td>
-                                    <td class="border p-2">${s.duration}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                `;
-                document.getElementById('scheduleSection').classList.remove('hidden');
-                alert('Recommendations displayed successfully');
-
-                loadMonitoring();
+                document.getElementById('recommendations-tab-li').classList.remove('hidden');
+                switchTab('recommendations');
             } catch (err) {
                 console.error('Recommend error:', err);
                 farmLoading.classList.add('hidden');
                 farmError.textContent = 'Failed to connect to server: ' + err.message;
                 farmError.classList.remove('hidden');
-                alert('Network error: ' + err.message);
             }
+        });
+
+        // Handle crop selection
+        document.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('select-crop')) {
+                selectedCrop = e.target.dataset.crop;
+                console.log('Selected crop:', selectedCrop);
+                try {
+                    const response = await fetch('/api/schedule', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            farmer_id: farmerId,
+                            crop: selectedCrop,
+                            soil_type: soilType,
+                            land_size: farmData.land_size,
+                            start_date: farmData.start_date,
+                            water_available: farmData.water_available
+                        })
+                    });
+                    const result = await response.json();
+                    if (!response.ok) {
+                        alert('Failed to generate schedule: ' + result.error);
+                        return;
+                    }
+
+                    // Populate crop details
+                    document.getElementById('cropDetails').innerHTML = `
+                        <h4 class="font-bold text-lg">${selectedCrop}</h4>
+                        <p>Soil Type: ${result.soil_type}</p>
+                        <p>Recommended for: Coastal regions with high water availability.</p>
+                        <p>Expected Yield: ${result.water_schedule[0].water_quantity / farmData.land_size / 2} kg/acre</p>
+                    `;
+
+                    // Populate water schedule
+                    document.getElementById('waterSchedule').innerHTML = `
+                        <table class="w-full border-collapse border">
+                            <thead>
+                                <tr class="bg-gray-200">
+                                    <th class="border p-2">Day</th>
+                                    <th class="border p-2">Time</th>
+                                    <th class="border p-2">Water Quantity (L)</th>
+                                    <th class="border p-2">Method</th>
+                                    <th class="border p-2">Speed</th>
+                                    <th class="border p-2">Duration</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${result.water_schedule.map(s => `
+                                    <tr>
+                                        <td class="border p-2">${s.day}</td>
+                                        <td class="border p-2">${s.time}</td>
+                                        <td class="border p-2">${s.water_quantity}</td>
+                                        <td class="border p-2">${s.method}</td>
+                                        <td class="border p-2">${s.speed}</td>
+                                        <td class="border p-2">${s.duration}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+
+                    // Populate nutrient schedule
+                    document.getElementById('nutrientSchedule').innerHTML = `
+                        <table class="w-full border-collapse border">
+                            <thead>
+                                <tr class="bg-gray-200">
+                                    <th class="border p-2">Week Start</th>
+                                    <th class="border p-2">Nutrient Quantity (kg)</th>
+                                    <th class="border p-2">Type</th>
+                                    <th class="border p-2">Application Method</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${result.nutrient_schedule.map(s => `
+                                    <tr>
+                                        <td class="border p-2">${s.week_start}</td>
+                                        <td class="border p-2">${s.nutrient_quantity}</td>
+                                        <td class="border p-2">${s.type}</td>
+                                        <td class="border p-2">${s.application_method}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+
+                    // Populate pesticides
+                    document.getElementById('pesticidesInfo').innerHTML = `
+                        <h4 class="font-bold">${result.pesticide.pesticide}</h4>
+                        <p><strong>Preparation:</strong> ${result.pesticide.preparation}</p>
+                        <p><strong>Measures:</strong> ${result.pesticide.measures}</p>
+                    `;
+
+                    // Show tabs
+                    ['crop-details', 'water-schedule', 'nutrient-schedule', 'motor-status', 'notifications', 'pesticides', 'progress'].forEach(tab => {
+                        document.getElementById(`${tab}-tab-li`).classList.remove('hidden');
+                    });
+
+                    loadMonitoring();
+                    switchTab('crop-details');
+                } catch (err) {
+                    console.error('Schedule error:', err);
+                    alert('Failed to connect to server: ' + err.message);
+                }
+            }
+        });
+
+        // Generate water schedule
+        document.getElementById('generateWaterSchedule').addEventListener('click', async () => {
+            if (!selectedCrop) {
+                alert('Please select a crop first');
+                return;
+            }
+            const response = await fetch('/api/schedule', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    farmer_id: farmerId,
+                    crop: selectedCrop,
+                    soil_type: soilType,
+                    land_size: farmData.land_size,
+                    start_date: farmData.start_date,
+                    water_available: farmData.water_available
+                })
+            });
+            const result = await response.json();
+            if (!response.ok) {
+                alert('Failed to generate water schedule: ' + result.error);
+                return;
+            }
+            document.getElementById('waterSchedule').innerHTML = `
+                <table class="w-full border-collapse border">
+                    <thead>
+                        <tr class="bg-gray-200">
+                            <th class="border p-2">Day</th>
+                            <th class="border p-2">Time</th>
+                            <th class="border p-2">Water Quantity (L)</th>
+                            <th class="border p-2">Method</th>
+                            <th class="border p-2">Speed</th>
+                            <th class="border p-2">Duration</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${result.water_schedule.map(s => `
+                            <tr>
+                                <td class="border p-2">${s.day}</td>
+                                <td class="border p-2">${s.time}</td>
+                                <td class="border p-2">${s.water_quantity}</td>
+                                <td class="border p-2">${s.method}</td>
+                                <td class="border p-2">${s.speed}</td>
+                                <td class="border p-2">${s.duration}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        });
+
+        // Generate nutrient schedule
+        document.getElementById('generateNutrientSchedule').addEventListener('click', async () => {
+            if (!selectedCrop) {
+                alert('Please select a crop first');
+                return;
+            }
+            const response = await fetch('/api/schedule', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    farmer_id: farmerId,
+                    crop: selectedCrop,
+                    soil_type: soilType,
+                    land_size: farmData.land_size,
+                    start_date: farmData.start_date,
+                    water_available: farmData.water_available
+                })
+            });
+            const result = await response.json();
+            if (!response.ok) {
+                alert('Failed to generate nutrient schedule: ' + result.error);
+                return;
+            }
+            document.getElementById('nutrientSchedule').innerHTML = `
+                <table class="w-full border-collapse border">
+                    <thead>
+                        <tr class="bg-gray-200">
+                            <th class="border p-2">Week Start</th>
+                            <th class="border p-2">Nutrient Quantity (kg)</th>
+                            <th class="border p-2">Type</th>
+                            <th class="border p-2">Application Method</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${result.nutrient_schedule.map(s => `
+                            <tr>
+                                <td class="border p-2">${s.week_start}</td>
+                                <td class="border p-2">${s.nutrient_quantity}</td>
+                                <td class="border p-2">${s.type}</td>
+                                <td class="border p-2">${s.application_method}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        });
+
+        // Check motor status
+        document.getElementById('checkMotorStatus').addEventListener('click', async () => {
+            await loadMonitoring();
         });
 
         // Load monitoring data
         async function loadMonitoring() {
             if (!farmerId) return;
             console.log('Loading monitoring data for farmerId:', farmerId);
-            alert('Loading monitoring data');
-            const monitoringError = document.getElementById('monitoringError');
-            const monitoringLoading = document.getElementById('monitoringLoading');
-            monitoringError.classList.add('hidden');
-            monitoringLoading.classList.remove('hidden');
-
             try {
                 const response = await fetch(`/api/monitor?farmer_id=${farmerId}`);
                 console.log('Monitoring response status:', response.status);
                 const result = await response.json();
-                monitoringLoading.classList.add('hidden');
-
                 if (!response.ok) {
-                    monitoringError.textContent = result.error || 'Failed to fetch monitoring data';
-                    monitoringError.classList.remove('hidden');
-                    alert('Monitoring error: ' + monitoringError.textContent);
+                    alert('Failed to fetch monitoring data: ' + result.error);
                     return;
                 }
 
-                const monitoring = document.getElementById('monitoring');
-                monitoring.innerHTML = `
+                document.getElementById('motorStatus').innerHTML = `
                     <p><strong>Moisture Level:</strong> ${result.moisture}</p>
                     <p><strong>Motor Status:</strong> ${result.motor_status}</p>
                     <p><strong>Water Supplied:</strong> ${result.water_supplied} L</p>
-                    <p><strong>Crop Stage:</strong> ${result.crop_stage}</p>
-                    <p><strong>Progress:</strong> ${result.progress}%</p>
                 `;
-                document.getElementById('monitoringSection').classList.remove('hidden');
-                alert('Monitoring data loaded');
+
+                document.getElementById('notificationsList').innerHTML = result.notifications.map(n => `
+                    <div class="p-4 mb-2 rounded-lg ${n.type === 'warning' ? 'bg-yellow-100' : 'bg-blue-100'}">
+                        <p>${n.message}</p>
+                    </div>
+                `).join('');
+
+                document.getElementById('progressBar').innerHTML = `
+                    <div class="w-full bg-gray-200 rounded-full h-4">
+                        <div class="bg-green-600 h-4 rounded-full" style="width: ${result.progress}%"></div>
+                    </div>
+                `;
+                document.getElementById('currentStage').textContent = `Current Stage: ${result.crop_stage}`;
+                document.getElementById('updateStage').value = result.crop_stage;
             } catch (err) {
                 console.error('Monitoring error:', err);
-                monitoringLoading.classList.add('hidden');
-                monitoringError.textContent = 'Network error occurred';
-                monitoringError.classList.remove('hidden');
                 alert('Monitoring network error: ' + err.message);
             }
         }
 
-        // Refresh monitoring data
-        document.getElementById('refreshMonitoring').addEventListener('click', loadMonitoring);
+        // Update crop stage
+        document.getElementById('updateStageBtn').addEventListener('click', async () => {
+            if (!selectedCrop) {
+                alert('Please select a crop first');
+                return;
+            }
+            const newStage = document.getElementById('updateStage').value;
+            try {
+                const response = await fetch('/api/update_stage', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        farmer_id: farmerId,
+                        stage: newStage,
+                        selected_crop: selectedCrop
+                    })
+                });
+                const result = await response.json();
+                if (!response.ok) {
+                    alert('Failed to update stage: ' + result.error);
+                    return;
+                }
+                document.getElementById('progressBar').innerHTML = `
+                    <div class="w-full bg-gray-200 rounded-full h-4">
+                        <div class="bg-green-600 h-4 rounded-full" style="width: ${result.progress}%"></div>
+                    </div>
+                `;
+                document.getElementById('currentStage').textContent = `Current Stage: ${result.stage}`;
+                alert('Crop stage updated successfully');
+            } catch (err) {
+                console.error('Stage update error:', err);
+                alert('Failed to update stage: ' + err.message);
+            }
+        });
+
+        // Tab switching
+        function switchTab(tabId) {
+            document.querySelectorAll('#tab-content > div').forEach(div => div.classList.add('hidden'));
+            document.querySelectorAll('#tabs li button').forEach(btn => {
+                btn.classList.remove('border-green-600', 'text-green-600');
+                btn.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+            });
+
+            document.getElementById(tabId).classList.remove('hidden');
+            const tabButton = document.getElementById(`${tabId}-tab`);
+            tabButton.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+            tabButton.classList.add('border-green-600', 'text-green-600');
+        }
+
+        document.querySelectorAll('#tabs button').forEach(button => {
+            button.addEventListener('click', () => switchTab(button.id.replace('-tab', '')));
+        });
 
         // Logout
         document.getElementById('logoutBtn').addEventListener('click', () => {
-            console.log('Logging out');
-            alert('Logging out');
             farmerId = null;
-            document.getElementById('dashboard').classList.add('hidden');
+            selectedCrop = null;
+            soilType = null;
+            farmData = null;
+            document.getElementById('inputForm').classList.add('hidden');
             document.getElementById('authSection').classList.remove('hidden');
             document.getElementById('logoutBtn').classList.add('hidden');
             document.getElementById('authForm').reset();
@@ -420,13 +705,16 @@
             authSubmit.textContent = 'Login';
             toggleAuth.textContent = 'Register instead';
             nameField.classList.add('hidden');
+            ['recommendations', 'crop-details', 'water-schedule', 'nutrient-schedule', 'motor-status', 'notifications', 'pesticides', 'progress'].forEach(tab => {
+                document.getElementById(`${tab}-tab-li`).classList.add('hidden');
+            });
+            switchTab('input');
         });
 
-        // Debug: Check if form exists
+        // Debug form loading
         window.onload = () => {
             const farmForm = document.getElementById('farmForm');
             if (!farmForm) {
-                alert('Error: Farm form not found');
                 console.error('Farm form not found');
             } else {
                 console.log('Farm form loaded successfully');
