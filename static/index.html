@@ -10,7 +10,7 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background: url('https://optcms.s3.ca-central-1.amazonaws.com/www.indiavsdisinformation.com/2023/202302/20230226-wsfl20230227131as.jpg') no-repeat center center fixed; /* Indian rice field */
+            background: url('https://optcms.s3.ca-central-1.amazonaws.com/www.indiavsdisinformation.com/2023/202302/20230226-wsfl20230227131as.jpg') no-repeat center center fixed;
             background-size: cover;
         }
         .login-container {
@@ -38,6 +38,13 @@
             display: flex;
             align-items: center;
             gap: 1rem;
+        }
+        #crop-details {
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
         }
     </style>
 </head>
@@ -181,14 +188,15 @@
             </div>
 
             <!-- Crop Details -->
-            <div class="hidden p-6 bg-white rounded-lg shadow-md" id="crop-details" role="tabpanel" aria-labelledby="crop-details-tab">
-                <h3 class="text-xl font-bold mb-4 text-green-800">Crop Details</h3>
-                <div id="cropDetails" class="text-gray-700"></div>
+            <div class="hidden p-6 rounded-lg shadow-md" id="crop-details" role="tabpanel" aria-labelledby="crop-details-tab">
+                <h3 class="text-xl font-bold mb-4 text-white">Crop Details</h3>
+                <div id="cropDetails" class="text-white space-y-4"></div>
             </div>
 
             <!-- Moisture Level -->
             <div class="hidden p-6 bg-white rounded-lg shadow-md" id="moisture" role="tabpanel" aria-labelledby="moisture-tab">
                 <h3 class="text-xl font-bold mb-4 text-green-800">Moisture Level</h3>
+                <button id="checkMoistureLevel" class="bg-green-600 text-white p-2 rounded-lg hover:bg-green-700 mb-4">Check Moisture Level</button>
                 <div id="moistureLevel" class="text-gray-700"></div>
                 <p id="lastUpdated" class="text-sm text-gray-500 mt-2"></p>
             </div>
@@ -218,11 +226,13 @@
                 <div id="progressBar" class="mb-4"></div>
                 <div id="currentStage" class="mb-4 text-gray-700"></div>
                 <select id="updateStage" class="p-2 border rounded-lg mb-4">
-                    <option value="Seedling">Seedling</option>
-                    <option value="Vegetative Growth">Vegetative Growth</option>
-                    <option value="Flowering">Flowering</option>
-                    <option value="Fruiting">Fruiting</option>
+                    <option value="Preparation of soil">Preparation of soil</option>
+                    <option value="Sowing">Sowing</option>
+                    <option value="Adding fertilizers and manures">Adding fertilizers and manures</option>
+                    <option value="Irrigation">Irrigation</option>
+                    <option value="Protection from weeds or pests">Protection from weeds or pests</option>
                     <option value="Harvesting">Harvesting</option>
+                    <option value="Storage of the yield">Storage of the yield</option>
                 </select>
                 <button id="updateStageBtn" class="bg-green-600 text-white p-2 rounded-lg hover:bg-green-700">Update Stage</button>
             </div>
@@ -239,12 +249,14 @@
         // Toggle auth form
         const toggleAuth = document.getElementById('toggleAuth');
         const authTitle = document.getElementById('authTitle');
+        const authSubmit = document.getElementById('authSubmit');
         toggleAuth.addEventListener('click', (e) => {
             e.preventDefault();
             const isLogin = authTitle.textContent === 'Login';
             authTitle.textContent = isLogin ? 'Register' : 'Login';
             toggleAuth.textContent = isLogin ? 'Login instead' : 'Register instead';
             document.getElementById('nameField').classList.toggle('hidden', !isLogin);
+            authSubmit.textContent = isLogin ? 'Register' : 'Login';
         });
 
         // Handle auth form submission
@@ -287,6 +299,10 @@
                     document.getElementById('logoutBtn').classList.remove('hidden');
                     document.querySelectorAll('.navbar-tabs a').forEach(a => a.classList.remove('hidden'));
                 } else {
+                    authTitle.textContent = 'Login';
+                    toggleAuth.textContent = 'Register instead';
+                    document.getElementById('nameField').classList.add('hidden');
+                    authSubmit.textContent = 'Login';
                     authError.textContent = result.message;
                     authError.classList.remove('text-red-500');
                     authError.classList.add('text-green-500');
@@ -385,11 +401,47 @@
         });
 
         // Handle crop selection and navigate to schedule
-        document.addEventListener('click', (e) => {
+        document.addEventListener('click', async (e) => {
             if (e.target.classList.contains('select-crop')) {
                 selectedCrop = e.target.dataset.crop;
                 document.getElementById('schedule-tab').classList.remove('hidden');
                 document.getElementById('moisture-tab').classList.remove('hidden');
+                document.getElementById('crop-details-tab').classList.remove('hidden');
+
+                // Fetch crop details and set background
+                try {
+                    const response = await fetch(`/api/crop_details?crop=${selectedCrop}`);
+                    const result = await response.json();
+                    if (!response.ok) {
+                        document.getElementById('cropDetails').innerHTML = `<p class="text-red-500">Failed to load crop details: ${result.error}</p>`;
+                        return;
+                    }
+
+                    document.getElementById('crop-details').style.backgroundImage = `url('${result.image_url}')`;
+                    document.getElementById('cropDetails').innerHTML = `
+                        <div class="p-4 rounded-lg bg-black bg-opacity-50">
+                            <h4 class="font-bold text-lg">Scientific Name</h4>
+                            <p>${result.details["Scientific Name"] || 'N/A'}</p>
+                            <h4 class="font-bold text-lg mt-4">Growth Conditions</h4>
+                            <p>${result.details["Growth Conditions"] || 'N/A'}</p>
+                            <h4 class="font-bold text-lg mt-4">Soil Requirements</h4>
+                            <p>${result.details["Soil Requirements"] || 'N/A'}</p>
+                            <h4 class="font-bold text-lg mt-4">Water Needs</h4>
+                            <p>${result.details["Water Needs"] || 'N/A'}</p>
+                            <h4 class="font-bold text-lg mt-4">Care Tips</h4>
+                            <p>${result.details["Care Tips"] || 'N/A'}</p>
+                            <h4 class="font-bold text-lg mt-4">Pests and Diseases</h4>
+                            <p>${result.details["Pests and Diseases"] || 'N/A'}</p>
+                            <h4 class="font-bold text-lg mt-4">Harvest Time</h4>
+                            <p>${result.details["Harvest Time"] || 'N/A'}</p>
+                            <h4 class="font-bold text-lg mt-4">Yield Potential</h4>
+                            <p>${result.details["Yield Potential"] || 'N/A'}</p>
+                        </div>
+                    `;
+                } catch (err) {
+                    document.getElementById('cropDetails').innerHTML = `<p class="text-red-500">Network error: ${err.message}</p>`;
+                }
+
                 switchTab('schedule');
                 updateProgress();
             }
@@ -501,30 +553,29 @@
             }
         });
 
-        // Update moisture level every 10 minutes
-        async function updateMoisture() {
+        // Check moisture level from ThingSpeak
+        document.getElementById('checkMoistureLevel').addEventListener('click', async () => {
             if (!farmerId) return;
             try {
-                const response = await fetch(`/api/monitor?farmer_id=${farmerId}`);
+                const response = await fetch(`/api/thingspeak_moisture?farmer_id=${farmerId}`);
                 const result = await response.json();
                 if (!response.ok) {
                     document.getElementById('moistureLevel').innerHTML = `<p class="text-red-500">Failed to fetch moisture: ${result.error}</p>`;
                     return;
                 }
-                const now = new Date().toLocaleTimeString();
+                const lastValue = result.last_value;
+                const lastUpdated = result.last_updated;
                 document.getElementById('moistureLevel').innerHTML = `
-                    <p class="text-gray-700"><strong>Moisture Level:</strong> ${result.moisture}</p>
-                    <p class="text-gray-700"><strong>Motor Status:</strong> ${result.motor_status}</p>
-                    <p class="text-gray-700"><strong>Water Supplied:</strong> ${result.water_supplied} L</p>
+                    <p class="text-gray-700"><strong>Last Moisture Level:</strong> ${lastValue}%</p>
+                    <p class="text-gray-700"><strong>Last Updated:</strong> ${lastUpdated}</p>
                 `;
-                document.getElementById('lastUpdated').textContent = `Last updated: ${now}`;
+                document.getElementById('lastUpdated').textContent = `Last checked: ${new Date().toLocaleTimeString()}`;
             } catch (err) {
                 document.getElementById('moistureLevel').innerHTML = `<p class="text-red-500">Network error: ${err.message}</p>`;
             }
-        }
+        });
 
-        // Initial moisture update and set interval
-        if (farmerId) updateMoisture();
+        // Update moisture level every 10 minutes (initial call removed)
         setInterval(updateMoisture, 10 * 60 * 1000); // Every 10 minutes
 
         // Check motor status
@@ -616,6 +667,7 @@
             document.getElementById('authForm').reset();
             authTitle.textContent = 'Login';
             toggleAuth.textContent = 'Register instead';
+            authSubmit.textContent = 'Login';
             document.getElementById('nameField').classList.add('hidden');
             document.querySelectorAll('.navbar-tabs a').forEach(a => a.classList.add('hidden'));
             switchTab('login');
@@ -629,20 +681,26 @@
             const daysElapsed = Math.floor((now - start) / (1000 * 60 * 60 * 24));
             let stage, progress;
 
-            if (daysElapsed < 10) {
-                stage = 'Seedling';
-                progress = 10;
+            if (daysElapsed < 7) {
+                stage = 'Preparation of soil';
+                progress = 14;
+            } else if (daysElapsed < 14) {
+                stage = 'Sowing';
+                progress = 28;
             } else if (daysElapsed < 30) {
-                stage = 'Vegetative Growth';
-                progress = 30;
+                stage = 'Adding fertilizers and manures';
+                progress = 43;
             } else if (daysElapsed < 60) {
-                stage = 'Flowering';
-                progress = 60;
+                stage = 'Irrigation';
+                progress = 57;
             } else if (daysElapsed < 90) {
-                stage = 'Fruiting';
-                progress = 80;
-            } else {
+                stage = 'Protection from weeds or pests';
+                progress = 71;
+            } else if (daysElapsed < 120) {
                 stage = 'Harvesting';
+                progress = 86;
+            } else {
+                stage = 'Storage of the yield';
                 progress = 100;
             }
 
