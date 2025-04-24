@@ -7,7 +7,6 @@ import requests
 import os
 import hashlib
 import datetime
-import json
 import logging
 
 # Configure logging
@@ -55,12 +54,34 @@ def init_db():
 
 init_db()
 
-# Load CSV files
+# Load CSV files with validation
 try:
     soil_types_df = pd.read_csv('soil_types.csv')
     soil_crops_df = pd.read_csv('soil_crops.csv')
     soil_nutrients_df = pd.read_csv('soil_nutrients.csv')
     crop_nutrients_df = pd.read_csv('crop_nutrients.csv')
+
+    # Validate soil_types.csv
+    required_soil_types_cols = ['soil_type', 'r', 'g', 'b', 'ph', 'ec']
+    missing_soil_types_cols = [col for col in required_soil_types_cols if col not in soil_types_df.columns]
+    if missing_soil_types_cols:
+        logger.error(f"Missing columns in soil_types.csv: {missing_soil_types_cols}")
+        raise ValueError(f"Missing columns in soil_types.csv: {missing_soil_types_cols}")
+
+    # Validate soil_crops.csv
+    required_soil_crops_cols = ['Soil_Type', 'Crop']
+    missing_soil_crops_cols = [col for col in required_soil_crops_cols if col not in soil_crops_df.columns]
+    if missing_soil_crops_cols:
+        logger.error(f"Missing columns in soil_crops.csv: {missing_soil_crops_cols}")
+        raise ValueError(f"Missing columns in soil_crops.csv: {missing_soil_crops_cols}")
+
+    # Validate crop_nutrients.csv
+    required_crop_nutrients_cols = ['Crop', 'Quantity (kg/acre)']
+    missing_crop_nutrients_cols = [col for col in required_crop_nutrients_cols if col not in crop_nutrients_df.columns]
+    if missing_crop_nutrients_cols:
+        logger.error(f"Missing columns in crop_nutrients.csv: {missing_crop_nutrients_cols}")
+        raise ValueError(f"Missing columns in crop_nutrients.csv: {missing_crop_nutrients_cols}")
+
     logger.info("CSV files loaded successfully")
 except Exception as e:
     logger.error(f"Failed to load CSV files: {e}")
@@ -72,6 +93,7 @@ X = soil_types_df[features]
 y = soil_types_df['soil_type']
 model = RandomForestClassifier(n_estimators=100, max_depth=15, random_state=42)
 model.fit(X, y)
+logger.info("RandomForest model trained successfully")
 
 # ThingSpeak API configuration
 SOIL_THINGSPEAK_URL = "https://api.thingspeak.com/channels/2905970/feeds.json?api_key=41R500B0CY37KF7B&results=10"
@@ -159,8 +181,10 @@ def recommend():
         # Calculate crop characteristics
         recommendations = []
         for crop in suitable_crops[:3]:  # Top 3 crops
-            crop_info = crop_nutrients_df[crop_nutrients_df['Crop'] == crop].iloc[0]
-            nutrients = crop_info['Quantity (kg/acre)']
+            crop_info = crop_nutrients_df[crop_nutrients_df['Crop'] == crop]
+            if crop_info.empty:
+                continue
+            nutrients = crop_info['Quantity (kg/acre)'].iloc[0]
             water_requirement = 5500 if crop == 'Paddy' else 3000  # Example values
             cost = water_requirement * 10
             yield_est = 1000 if crop == 'Paddy' else 2000
@@ -175,11 +199,14 @@ def recommend():
                 "market_trend": market_trend
             })
 
+        if not recommendations:
+            return jsonify({"error": "No nutrient data found for suitable crops"}), 400
+
         # Generate watering schedule
         schedule = []
         selected_crop = recommendations[0]['crop']
         base_water = recommendations[0]['water_requirement'] * land_size
-        soil_adjust = {'Sandy': 1.2, 'Black Cotton': 0.8}.get(soil_type, 1.0)
+        soil_adjust = {'Sandy Soil': 1.2, 'Black Cotton Soil - Deep Black Soil': 0.8}.get(soil_type, 1.0)
         total_water = base_water * soil_adjust
 
         for i in range(7):
