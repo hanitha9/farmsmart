@@ -27,6 +27,32 @@ crop_details = {
             "Yield Potential": "20-30 tons per acre under optimal conditions."
         }
     },
+    "Brinjal": {
+        "image_url": "https://images.unsplash.com/photo-1603046899828-790e1c4ae4b8?auto=format&fit=crop&w=500&q=80",
+        "details": {
+            "Scientific Name": "Solanum melongena",
+            "Growth Conditions": "Warm weather, 25°C-35°C, well-drained soil with pH 5.5-7.0.",
+            "Soil Requirements": "Sandy loam or loamy soil rich in organic matter.",
+            "Water Needs": "1 inch per week, avoid waterlogging.",
+            "Care Tips": "Mulch to retain moisture, apply balanced fertilizer (10-10-10).",
+            "Pests and Diseases": "Fruit borers, aphids, bacterial wilt. Use neem oil and crop rotation.",
+            "Harvest Time": "60-90 days after planting, when fruits are glossy.",
+            "Yield Potential": "15-25 tons per acre."
+        }
+    },
+    "Okra": {
+        "image_url": "https://images.unsplash.com/photo-1628772447477-5b86e57c5a0f?auto=format&fit=crop&w=500&q=80",
+        "details": {
+            "Scientific Name": "Abelmoschus esculentus",
+            "Growth Conditions": "Warm climate, 25°C-35°C, well-drained soil with pH 6.0-7.5.",
+            "Soil Requirements": "Loamy or sandy loam with good organic content.",
+            "Water Needs": "1 inch per week, consistent moisture.",
+            "Care Tips": "Add compost, use 5-10-10 fertilizer, avoid overwatering.",
+            "Pests and Diseases": "Aphids, whiteflies, root-knot nematodes. Use insecticidal soap.",
+            "Harvest Time": "50-65 days after planting, when pods are 2-3 inches long.",
+            "Yield Potential": "8-12 tons per acre."
+        }
+    },
     "Rice": {
         "image_url": "https://images.unsplash.com/photo-1592918319975-86a7b78c5c3d?auto=format&fit=crop&w=500&q=80",
         "details": {
@@ -59,6 +85,8 @@ crop_details = {
 crop_recommendations = {
     "Coastal Alluvial": [
         {"crop": "Tomato", "nutrients": 50, "water_requirement": 600, "cost": "Low", "yield": "High", "market_trend": "Stable"},
+        {"crop": "Brinjal", "nutrients": 50, "water_requirement": 300, "cost": "$200", "yield": "2000 kg/acre", "market_trend": "Stable"},
+        {"crop": "Okra", "nutrients": 45, "water_requirement": 350, "cost": "$180", "yield": "1800 kg/acre", "market_trend": "Stable"},
         {"crop": "Rice", "nutrients": 70, "water_requirement": 1200, "cost": "Medium", "yield": "High", "market_trend": "Rising"},
         {"crop": "Wheat", "nutrients": 60, "water_requirement": 500, "cost": "Low", "yield": "Medium", "market_trend": "Stable"}
     ]
