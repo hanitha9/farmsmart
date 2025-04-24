@@ -10,7 +10,7 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYIlgep5gG_ExBugRKtZE-_pOg5Ga_mFRiVA&s') no-repeat center center fixed; /* Indian rice field */
+            background: url('https://optcms.s3.ca-central-1.amazonaws.com/www.indiavsdisinformation.com/2023/202302/20230226-wsfl20230227131as.jpg') no-repeat center center fixed; /* Indian rice field */
             background-size: cover;
         }
         .login-container {
@@ -39,13 +39,6 @@
             align-items: center;
             gap: 1rem;
         }
-        #crop-details {
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            color: white;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
-        }
     </style>
 </head>
 <body class="min-h-screen">
@@ -54,7 +47,6 @@
         <div class="container mx-auto flex justify-between items-center">
             <h1 class="text-2xl font-bold">FarmSmart</h1>
             <div class="navbar-tabs">
-                <a href="#" id="history-tab" class="text-white hover:text-green-200 hidden">Previous History</a>
                 <a href="#" id="farm-input-tab" class="text-white hover:text-green-200 hidden">Farm Input</a>
                 <a href="#" id="recommendations-tab" class="text-white hover:text-green-200 hidden">Recommendations</a>
                 <a href="#" id="schedule-tab" class="text-white hover:text-green-200 hidden">Generate Schedule</a>
@@ -86,7 +78,7 @@
                             <div class="mb-4">
                                 <input type="email" id="email" class="w-full p-2 border rounded-lg" placeholder="Email" required>
                             </div>
-                            <div classffff="mb-4">
+                            <div class="mb-4">
                                 <input type="password" id="password" class="w-full p-2 border rounded-lg" placeholder="Password" required>
                             </div>
                             <button type="submit" id="authSubmit" class="w-full bg-green-600 text-white p-2 rounded-lg hover:bg-green-700">Login</button>
@@ -98,12 +90,6 @@
                         <div id="authLoading" class="text-center mt-4 hidden">Loading...</div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Previous History -->
-            <div class="hidden p-6 bg-white rounded-lg shadow-md" id="history" role="tabpanel" aria-labelledby="history-tab">
-                <h3 class="text-xl font-bold mb-4 text-green-800">Previous History</h3>
-                <div id="historyDetails" class="text-gray-700"></div>
             </div>
 
             <!-- Farm Input -->
@@ -195,9 +181,9 @@
             </div>
 
             <!-- Crop Details -->
-            <div class="hidden p-6 rounded-lg shadow-md" id="crop-details" role="tabpanel" aria-labelledby="crop-details-tab">
-                <h3 class="text-xl font-bold mb-4 text-white">Crop Details</h3>
-                <div id="cropDetails" class="text-white space-y-4"></div>
+            <div class="hidden p-6 bg-white rounded-lg shadow-md" id="crop-details" role="tabpanel" aria-labelledby="crop-details-tab">
+                <h3 class="text-xl font-bold mb-4 text-green-800">Crop Details</h3>
+                <div id="cropDetails" class="text-gray-700"></div>
             </div>
 
             <!-- Moisture Level -->
@@ -249,7 +235,6 @@
         let selectedCrop = null;
         let soilType = null;
         let farmData = null;
-        let hasFarmData = false;
 
         // Toggle auth form
         const toggleAuth = document.getElementById('toggleAuth');
@@ -297,44 +282,10 @@
 
                 if (isLogin) {
                     farmerId = result.farmer_id;
+                    switchTab('farm-input');
                     document.getElementById('login').classList.add('hidden');
                     document.getElementById('logoutBtn').classList.remove('hidden');
                     document.querySelectorAll('.navbar-tabs a').forEach(a => a.classList.remove('hidden'));
-
-                    // Check if user has previous farm data
-                    const farmResponse = await fetch('/api/recommend', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ farmer_id: farmerId })
-                    });
-                    const farmResult = await farmResponse.json();
-
-                    if (farmResult.soil_type && farmResult.recommendations) {
-                        hasFarmData = true;
-                        soilType = farmResult.soil_type;
-                        farmData = farmResult;
-                        document.getElementById('history-tab').classList.remove('hidden');
-                        document.getElementById('historyDetails').innerHTML = `
-                            <p><strong>Location:</strong> ${farmData.location}</p>
-                            <p><strong>Land Size:</strong> ${farmData.land_size} acres</p>
-                            <p><strong>Water Available:</strong> ${farmData.water_available} L</p>
-                            <p><strong>Start Date:</strong> ${farmData.start_date}</p>
-                            <p><strong>Soil Type:</strong> ${soilType}</p>
-                            <h4 class="font-bold mt-4">Recommended Crops:</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                ${farmResult.recommendations.map(r => `
-                                    <div class="crop-card p-4 rounded-lg flex flex-col items-center bg-white">
-                                        <img src="${r.image_url}" alt="${r.crop}" class="crop-image mb-2" onerror="this.src='https://via.placeholder.com/100';">
-                                        <h4 class="font-bold text-lg text-green-800">${r.crop}</h4>
-                                        <button class="select-crop bg-green-600 text-white p-2 rounded-lg hover:bg-green-700 mt-2 w-full" data-crop="${r.crop}">Select</button>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        `;
-                        switchTab('history');
-                    } else {
-                        switchTab('farm-input');
-                    }
                 } else {
                     authError.textContent = result.message;
                     authError.classList.remove('text-red-500');
@@ -434,39 +385,11 @@
         });
 
         // Handle crop selection and navigate to schedule
-        document.addEventListener('click', async (e) => {
+        document.addEventListener('click', (e) => {
             if (e.target.classList.contains('select-crop')) {
                 selectedCrop = e.target.dataset.crop;
                 document.getElementById('schedule-tab').classList.remove('hidden');
                 document.getElementById('moisture-tab').classList.remove('hidden');
-                document.getElementById('crop-details-tab').classList.remove('hidden');
-
-                // Fetch crop details and set background
-                try {
-                    const response = await fetch(`/api/crop_details?crop=${selectedCrop}`);
-                    const result = await response.json();
-                    if (!response.ok) {
-                        document.getElementById('cropDetails').innerHTML = `<p class="text-red-500">Failed to load crop details: ${result.error}</p>`;
-                        return;
-                    }
-
-                    document.getElementById('crop-details').style.backgroundImage = `url('${result.image_url}')`;
-                    document.getElementById('cropDetails').innerHTML = `
-                        <div class="p-4 rounded-lg bg-black bg-opacity-50">
-                            <h4 class="font-bold text-lg">Growth Conditions</h4>
-                            <p>${result.details["Growth Conditions"]}</p>
-                            <h4 class="font-bold text-lg mt-4">Care Tips</h4>
-                            <p>${result.details["Care Tips"]}</p>
-                            <h4 class="font-bold text-lg mt-4">Harvest Time</h4>
-                            <p>${result.details["Harvest Time"]}</p>
-                            <h4 class="font-bold text-lg mt-4">Common Pests</h4>
-                            <p>${result.details["Pests"]}</p>
-                        </div>
-                    `;
-                } catch (err) {
-                    document.getElementById('cropDetails').innerHTML = `<p class="text-red-500">Network error: ${err.message}</p>`;
-                }
-
                 switchTab('schedule');
                 updateProgress();
             }
@@ -687,7 +610,6 @@
             selectedCrop = null;
             soilType = null;
             farmData = null;
-            hasFarmData = false;
             document.getElementById('farm-input').classList.add('hidden');
             document.getElementById('login').classList.remove('hidden');
             document.getElementById('logoutBtn').classList.add('hidden');
